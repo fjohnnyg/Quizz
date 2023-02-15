@@ -44,8 +44,21 @@ public class Player {
                 try{
                     String line = in.readLine();
 
+                    out.write(line);
+                    out.newLine();
+                    out.flush();
+
+                    if (line.equals("/quit")) {
+                        socket.close();
+                        System.exit(0);
+                    }
                 } catch (IOException e) {
                     System.out.println("Something went wrong with the server. Connection is closing...");
+                    try {
+                        socket.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
