@@ -14,22 +14,28 @@
 >- More than 2 players can play the game.
 >
 > 
->- The player chooses the topic (GEOGRAPHY, SPORTS, ART, GENERAL).
+>- A player chooses the topic (GEOGRAPHY, SPORTS, ART, GENERAL).
 >
 > 
 >- A question is presented randomly by the topic. 
 >
 > 
->- If a player choose the topic GENERAL, the question is chosen randomly from all previous topics.
+>- If the player chooses the topic GENERAL, the question is chosen randomly from all previous topics.
 >
 > 
->- After a question is presented, the player receives 3 options of answers. He/she has to press the key (A, B or C) choosing which answer is correct.
+>- After the question is presented, the player receives 3 options of answers. He/she has to press the key (A, B or C) choosing which answer is correct.
 >
 > 
->- The server says if an answer was correct (if not, it shows the correct answer), plus a player receives a point when he/she answers correctly.
+>- The server says if an answer is correct if not, it shows the correct answer. 
+>
+>
+>- A player receives a point when he/she answers correctly.
 >
 > 
->- The game is over than all the questions are asked from the quiz, plus the winner is announced.
+>- The game is over than all the questions are asked from the quiz.
+>
+>
+>- The winner is announced - the player who answered the most questions correctly.
 
 
 ### Instructions to run:
