@@ -1,0 +1,108 @@
+GEOGRAPHY: Which country has the most islands?
+A. Sweden
+B. Finland
+C. Norway
+GEOGRAPHY: What is the smallest country in the world?
+A. Vatican
+B. Andorra
+C. Liechtenstein
+GEOGRAPHY: What is the capital of Canada?
+A. Ottawa
+B. Toronto
+C. Montreal
+GEOGRAPHY: Which is the longest river in the world?
+A. Nile
+B. Amazon
+C. Yangtze
+GEOGRAPHY: What is the highest mountain of Portugal?
+A. Pico
+B. Pico Ruivo
+C. Torre
+GEOGRAPHY: What is the capital of Australia?
+A. Canberra
+B. Sidney
+C. Melbourne
+GEOGRAPHY: Which country borders 14 nations and crosses 8 time zones?
+A. Russia
+B. USA
+C. China
+GEOGRAPHY: Havana is the capital of what country?
+A. Cuba
+B. Dominican Republic
+C. Jamaica
+GEOGRAPHY: What is the longest river of Portugal?
+A. Tejo
+B. Minho
+C. Douro
+GEOGRAPHY: What is Earth's largest continent?
+A. Asia
+B. South America
+C. North America
+
+SPORTS: In which year Portugal's national football team won the European championship?
+A. 2016
+B. 2014
+C. 2018
+SPORTS: What type of race is the Tour de France?
+A. Bicycle
+B. Car
+C. Horse
+SPORTS: What is the only country to have played in every single football´s World Cup?
+A. Brazil
+B. France
+C. Mexico
+SPORTS: What was the first city to host the modern Olympics twice?
+A. Paris
+B. Athens
+C. London
+SPORTS: The Olympics are held every how many years?
+A. 4
+B. 2
+C. 6
+SPORTS: In Formula 1 which team Luis Hamilton represents?
+A. Mercedes
+B. McLaren
+C. Ferrari
+SPORTS: How is a famous football player Edson Arantes do Nascimento called?
+A. Pele
+B. Maradona
+C. Deco
+SPORTS: What sport is best known as the “king of sports”?
+A. Football
+B. Baseball
+C. Basketball
+SPORTS: What is the surname of a famous Portuguese marathon runner who won multiple Olympic marathon medals?
+A. Rosa Mota
+B. Fernanda Ribeiro
+C. Patrícia Mamona
+
+ART: Who painted the ceiling of the Sistine Chapel in Rome?
+A. Michelangelo
+B. Leonardo da Vinci
+C. Raphael
+ART: Which famous graffiti artist is from Bristol?
+A. Banksy
+B. JR
+C. Seen
+ART: In which museum can you find the Mona Lisa?
+A. Louvre
+B. British Museum
+C. Tate Morden
+ART: Which surrealist artist is known for painting melting clocks?
+A. Salvador Dali
+B. Claude Monet
+C. Joan Miro
+ART: Which Mexican artist was married to Diego Rivera and is famous for her self portraits?
+A. Frida Khalo
+B. Mary Cassatt
+C. Georgina Quintana
+ART: Which country is Claude Monet from?
+A. France
+B. Spain
+C. Belgium
+ART: Which art movement is Picasso known for?
+A. Cubism
+B. Surrealism
+C. Futurism
+
+--FIM--
