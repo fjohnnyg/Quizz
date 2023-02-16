@@ -29,12 +29,20 @@ public final class GameMessages {
 
     public static final String WARNING = "If you leave a game now you'll loose all your points!";
 
+    public static final String GAME_OVER = "\u001B[34m" + """
+         
+ +-+-+-+-+ +-+-+-+-+
+ |G|a|m|e| |o|v|e|r|
+ +-+-+-+-+ +-+-+-+-+""" + "\u001B[0m";
+
     // For testing purposes, delete it after
     public static void main(String[] args) {
         System.out.println(GameMessages.WRONG_ANSWER);
         System.out.println(GameMessages.RIGHT_ANSWER);
+        System.out.println(GameMessages.GAME_OVER);
         System.out.println(GameMessages.WELCOME);
         System.out.println(GameMessages.NO_SUCH_COMMAND);
         System.out.println(GameMessages.WARNING);
+
     }
 }
