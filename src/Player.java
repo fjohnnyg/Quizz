@@ -1,10 +1,20 @@
+import server.drawing.Drawing;
+import server.messages.Messages;
+
 import java.io.*;
 import java.net.Socket;
+
+import static server.drawing.Drawing.ART_SIZE;
+import static server.drawing.DrawingEnum.ASCIIArtFont.ART_FONT_SERIF;
 
 public class Player {
     public static void main(String[] args) {
         Player player = new Player();
-
+        try {
+            Drawing.printTextArt (Messages.WELCOME, ART_SIZE, ART_FONT_SERIF,"|");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         try {
             player.start("localhost", 8082);
         } catch (IOException e) {
