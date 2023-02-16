@@ -1,3 +1,4 @@
+package server;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -154,7 +155,7 @@ public class Question {
      */
 
     public String questionToString(){
-    //public void questionToString(){
+        //public void questionToString(){
 
         String fullQuestionToServer = questionList.get(0).get(0).toString() + "\n";
 
@@ -184,3 +185,4 @@ public class Question {
         return questionToString();
     }
 }
+
