@@ -42,7 +42,7 @@ public class Server {
     }
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
-        playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
+        //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
         playerHandler.send(Messages.COMMANDS_LIST);
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
