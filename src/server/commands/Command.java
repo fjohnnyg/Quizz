@@ -6,7 +6,8 @@ public enum Command {
     WHISPER("/whisper", new WhisperHandler()),
     QUIT("/quit", new QuitHandler()),
     SHOUT("/shout", new ShoutHandler()),
-    NAME("/name", new NameHandler());
+    NAME("/name", new NameHandler()),
+    START("/start", new  startHandler());
 
     private String description;
     private CommandHandler handler;

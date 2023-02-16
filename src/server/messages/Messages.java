@@ -7,6 +7,7 @@ public abstract class Messages {
     public static final String NO_SUCH_COMMAND = "⚠️ Invalid command!";
     public static final String COMMANDS_LIST = """
             List of available commands:
+            /start -> to start a new game
             /list -> gets you the list of connected clients
             /shout <message> -> lets you shout a message to all connected clients
             /whisper <username> <message> -> lets you whisper a message to a single connected client
@@ -22,5 +23,6 @@ public abstract class Messages {
 
     public static final String SELF_NAME_CHANGED = "You changed your name to: %s";
     public static final String NAME_CHANGED = "%s changed name to: %s";
+    public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
 
 }
