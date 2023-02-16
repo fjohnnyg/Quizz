@@ -23,5 +23,6 @@ public abstract class Messages {
 
     public static final String SELF_NAME_CHANGED = "You changed your name to: %s";
     public static final String NAME_CHANGED = "%s changed name to: %s";
+    public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
 
 }
