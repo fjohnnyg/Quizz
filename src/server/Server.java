@@ -1,5 +1,6 @@
 package server;
 
+import server.commands.Command;
 import server.messages.Messages;
 
 import java.io.BufferedWriter;
@@ -17,6 +18,9 @@ public class Server {
     private ServerSocket serverSocket;
     private ExecutorService service;
     private List<PlayerHandler> players;
+    private Question questions;
+    private int numberOfQuestions = 10;
+    private int totalOfQuestions;
     public Server() {
         players = new CopyOnWriteArrayList<>();
     }
@@ -47,17 +51,34 @@ public class Server {
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
 
-    public void printQuestion(String string) {
-        String question = string.split("-")[0];
-        String answerA = string.split("-")[1];
-        String answerB = string.split("-")[2];
-        String answerC = string.split("-")[3];
-        String answerD = string.split("-")[4];
+/*    public void startGame(PlayerHandler playerHandler) {
+        int questionNumber = 0;
+        int gameSize = 10;
+        while (questionNumber < gameSize) {
+            //themeChooser();
+            playerHandler.send(sendQuestion(questionNumber));
+            playerHandler.run();
+            questionNumber++;
 
-        players.stream()
-                .forEach(handler -> handler.send(question + "\n" + answerA + "\n" + answerB + "\n" + answerC + "\n" + answerD));
+        }
+    }*/
+
+    public String sendQuestion(int totalOfQuestions) {
+        questions = new Question();
+        String string = questions.getQuestions().toString().split("00")[totalOfQuestions];
+        String question = string.split("::")[0];
+        String answerA = string.split("::")[1];
+        String answerB = string.split("::")[2];
+        String answerC = string.split("::")[3];
+        String answerD = string.split("::")[4];
+
+        return question + "\n" + answerA + "\n" + answerB + "\n" + answerC + "\n" + answerD;
     }
 
+    //private boolean verifyAnswer(String message) {
+       // String correctAnswer = questions.getCorrectAnswer();
+  //      return correctAnswer.equals(message);
+    //}
     public void broadcast(String name, String message) {
         players.stream()
                 .filter(handler -> !handler.getName().equals(name))
@@ -96,26 +117,33 @@ public class Server {
         @Override
         public void run() {
             addPlayer(this);
-            try {
-                Scanner in = new Scanner(playerSocket.getInputStream());
-                while (in.hasNext()) {
-                    message = in.nextLine();
-                    if (isCommand(message)) {
-                        dealWithCommand(message);
+            /*int questionNumber = 0;
+            int gameSize = 10;
+            while (questionNumber < gameSize) {*/
+                try {
+                    Scanner in = new Scanner(playerSocket.getInputStream());
+                    while (in.hasNext()) {
+                        message = in.nextLine();
+                        if (isCommand(message)) {
+                            dealWithCommand(message);
+                        }
+                        if (isAnswer(message)) {
+                            //dealWithAnswer(message);
+                            //questionNumber++;
+                            //this.send(sendQuestion(questionNumber));
+                        }
+                        /*else {
+                            this.send(Messages.NO_SUCH_COMMAND + "\n" + Messages.COMMANDS_LIST);
+                        }*/
+                        //broadcast(name, message);
+                        //this.send(Messages.NO_SUCH_COMMAND + "\n" + Messages.COMMANDS_LIST);
                     }
-                    if (!isCommand(message)) {
-                        System.out.printf(Messages.NO_SUCH_COMMAND + "\n" + Messages.COMMANDS_LIST);
-                    }
-                    if(isAnswer(message)) {
-                        dealWithAnswer(message);
-                    }
-                    broadcast(name, message);
+                } catch (IOException e) {
+                    System.err.println(Messages.CLIENT_ERROR + e.getMessage());
+                } finally {
+                    removePlayer(this);
                 }
-            } catch (IOException e) {
-                System.err.println(Messages.CLIENT_ERROR + e.getMessage());
-            } finally {
-                removePlayer(this);
-            }
+            //}
         }
 
         private boolean isAnswer(String message) {
@@ -125,16 +153,33 @@ public class Server {
                     message.equalsIgnoreCase("d"));
         }
 
-        private void dealWithAnswer(String message) {
-            //todo
-        }
+/*        private void dealWithAnswer(String message) {
+            if (verifyAnswer(message))
+                this.send("Your answer is correct!");
+            if (!verifyAnswer(message))
+//                this.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
+            totalOfQuestions++;
+            this.send(sendQuestion(totalOfQuestions));
+
+
+        }*/
 
         private boolean isCommand(String message) {
             return message.startsWith("/");
         }
 
         private void dealWithCommand(String message) throws IOException {
+            String description = message.split(" ")[0];
+            Command command = Command.getCommandFromDescription(description);
 
+            if (command == null) {
+                out.write(Messages.NO_SUCH_COMMAND);
+                out.newLine();
+                out.flush();
+                return;
+            }
+
+            command.getHandler().execute(Server.this, this);
         }
 
         public void send(String message) {
@@ -167,5 +212,15 @@ public class Server {
         public String getMessage() {
             return message;
         }
+
+        public int getNumberOfQuestions() {
+            return numberOfQuestions;
+        }
+
+        public int getTotalOfQuestions() {
+            return totalOfQuestions;
+        }
+
     }
+
 }
