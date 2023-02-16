@@ -5,17 +5,20 @@ import java.util.*;
 
 public class Question {
     //Queue<String> questionList;
-    Queue<List> questionList;
+    //Queue<List> questionList;
+    List<List> questionList;
+    String[] answersLetter = {"", "A. ", "B. ", "C. "};
+    String correctAnswer;
 
     public Question(){
-        this.questionList = new ArrayDeque<>(10);
+        this.questionList = new ArrayList<>();
     }
 
-    public static void main(String[] args) throws IOException {
+    /*public static void main(String[] args) throws IOException {
         Question teste = new Question();
 
         teste.createListOfQuestion("ART");
-    }
+    }*/
 
     /**
      * This method goes to the questions.txt and select the theme defined by the players
@@ -25,62 +28,70 @@ public class Question {
     public void createListOfQuestion(String gameTheme) throws IOException {
 
         List<String> temp = new ArrayList<>();
-        List<List> temp2 = new ArrayList<>();
-
-        //int counter = 0;
 
         BufferedReader readerQuestionTxt = new BufferedReader(new FileReader("resources/questions.txt"));
         String line = readerQuestionTxt.readLine();
 
+
+        //PARA COLOCAR TUDO NO MESMO SÍTIO
         while(line != null) {
 
             if (line.contains(gameTheme)) {
 
                 while(!line.isEmpty()) {
-                    for (int i = 0; i < 5; i++) {
-                        temp.add(line);
+                    for (int i = 0; i < 4; i++) {
+                        temp.add(line.replace(gameTheme + ": ", ""));
                         line = readerQuestionTxt.readLine();
                     }
-                    //this.questionList.add(new ArrayList(temp));
-                    temp2.add(new ArrayList<>(temp));
+                    this.questionList.add(new ArrayList(temp));
                     System.out.println(temp);
                     temp.clear();
-                    //counter++;
                 }
                 break;
             }
-
             line = readerQuestionTxt.readLine();
-
-            /*line.lines()
-                    .forEach(sentence -> {
-                        if (sentence.contains(gameTheme)) {
-                            questionList.add(sentence);
-                            //counter++;
-                        }
-                    });*/
         }
-        Collections.shuffle(temp2);
-        questionList.add(temp2);
+        randomQuestions();
+    }
+
+    public void randomQuestions(){
+        Collections.shuffle(questionList);
         System.out.println(questionList.toString());
 
-        /*while(line != null) {
+        this.correctAnswer = questionList.get(0).get(1).toString().substring(3);
+        System.out.println(this.correctAnswer);
 
-            if (line.contains(gameTheme)) {
+        Collections.shuffle(questionList.get(0).subList(1, 4));
+    }
 
-                while(!line.isEmpty()) {
-                    for (int i = 0; i < 5; i++) {
-                        this.questionList.add(line);
-                        //System.out.println(line);
-                        line = readerQuestionTxt.readLine();
-                    }
-                }
-                break;
-            }
+    public String questionToString(){
+    //public void questionToString(){
 
-            line = readerQuestionTxt.readLine();
+        String fullQuestionToServer = questionList.get(0).get(0).toString() + "\n";
+
+        for (int i = 1; i < questionList.get(0).size(); i++) {
+            fullQuestionToServer += answersLetter[i] + questionList.get(0).get(i).toString().substring(3) + "\n";
         }
-        System.out.println(questionList.toString());*/
 
+        this.correctAnswer = String.valueOf(fullQuestionToServer.charAt(fullQuestionToServer.indexOf(this.correctAnswer)-3));
+
+        /*getQuestion();
+        getCorrectAnswer();*/
+        removeQuestionFromList();
+
+        return fullQuestionToServer;
+    }
+
+    public void removeQuestionFromList(){
+        questionList.remove(0);
+        System.out.println(questionList);
+    }
+
+    public String getCorrectAnswer(){
+        //System.out.println(correctAnswer);
+        return correctAnswer;
+    }
+    public String getQuestion(){
+        return questionToString();
     }
 }
