@@ -29,7 +29,7 @@ public class Question {
     }
 
     /**
-     * This method goes to the questions.txt and select the theme defined by the players
+     * This method receives the theme chosen by the player and create the list of questions from questions.txt
      * Puts the questions into the list in a random order
      * @param gameTheme is the Theme chosen
      */
@@ -48,6 +48,14 @@ public class Question {
         ////
         randomQuestions();
     }
+
+    /**
+     * this method creates the List of the chosen theme
+     * @param gameTheme
+     * @param temp
+     * @param readerQuestionTxt
+     * @throws IOException
+     */
 
     public void createListOneTheme(String gameTheme, List<String> temp, BufferedReader readerQuestionTxt) throws IOException {
 
@@ -71,6 +79,13 @@ public class Question {
             line = readerQuestionTxt.readLine();
         }
     }
+
+    /**
+     * this method creates the List with questions of every themes
+     * the choice is made randomly
+     * @param temp
+     * @throws IOException
+     */
 
     public void createListAllThemes(List<String> temp) throws IOException {
 
@@ -108,9 +123,6 @@ public class Question {
 
     private void createCleanFile() throws IOException {
         Path originalFilePath = Paths.get("resources/questions.txt");
-        Path finalFilePath = Paths.get("resources/tempQuestions.txt");
-        System.out.println(Files.readAllLines(finalFilePath).get(0));
-
         Scanner txtFile = new Scanner(originalFilePath);
         PrintWriter writer = new PrintWriter("resources/tempQuestions.txt");
 
