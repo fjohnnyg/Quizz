@@ -1,45 +1,31 @@
 package server.drawing;
 
+import server.messages.Messages;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Drawing {
-    public static final int ART_SIZE = 12;
-    private static final String DEFAULT_ART_SYMBOL = "*";
+    int width = 200;
+    int height = 20;
 
-    private static int getBaselineFor(Graphics graphics, Font font){
-        FontMetrics metrics = graphics.getFontMetrics(font);
-        int yPosition = metrics.getAscent() - metrics.getDescent();
-        return yPosition;
-    }
+    public void createLogo() {
+        BufferedImage logo = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        Graphics graphics = logo.getGraphics();
+        graphics.setFont(new Font("SansSerif", Font.BOLD, 15));
 
-    private static int findImageWidth(int textHeight, String artText, String fontName){
-        BufferedImage image = new BufferedImage(1,1,BufferedImage.TYPE_INT_RGB);
-        Graphics graphics = image.getGraphics();
-        graphics.setFont(new Font(fontName, Font.BOLD, textHeight));
-        return graphics.getFontMetrics().stringWidth(artText);
-    }
+        Graphics2D graphics2D = (Graphics2D) graphics;
+        graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        graphics2D.drawString(Messages.WELCOME, 10, 20);
 
-    public static void printTextArt(String artText, int textHeight, DrawingEnum.ASCIIArtFont fontType, String artSymbol)
-            throws Exception{
-        String fontName = fontType.getValue();
-        int imageWidth = findImageWidth (textHeight, artText, fontName);
-
-        BufferedImage image = new BufferedImage(imageWidth, textHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics graphics = image.getGraphics();
-        Font font = new Font(fontName, Font.BOLD, textHeight);
-        graphics.setFont(font);
-
-        Graphics2D newGraphics = (Graphics2D) graphics;
-        newGraphics.drawString(artText, 0, getBaselineFor(graphics, font));
-
-        for (int y=0; y < textHeight; y++){
+        for (int y = 0; y < height; y++) {
             StringBuilder builder = new StringBuilder();
-            for (int x = 0; x < imageWidth; x++)
-                builder.append(image.getRGB(x,y) == Color.WHITE.getRGB() ? artSymbol : " ");
-            if (builder.toString().trim().isEmpty())
-                continue;System.out.println(builder);
+            for (int x = 0; x < width; x++) {
+                builder.append(logo.getRGB(x,y) == -16777216? " " : "$");
+            }
+            if (builder.toString().trim().isEmpty()){
+                continue;
+            }
+            System.out.println(builder);
         }
     }
-
 }
