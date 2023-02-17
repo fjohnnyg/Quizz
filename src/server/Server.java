@@ -3,9 +3,7 @@ package server;
 import server.commands.Command;
 import server.messages.Messages;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -112,11 +110,14 @@ public class Server {
         private Socket playerSocket;
         private BufferedWriter out;
         private String message;
+        private boolean hasLeft;
+        private BufferedReader in;
 
         public PlayerHandler(Socket playerSocket, String name) throws IOException {
             this.playerSocket = playerSocket;
             this.name = name;
             this.out = new BufferedWriter(new OutputStreamWriter(playerSocket.getOutputStream()));
+            this.in = new BufferedReader(new InputStreamReader(playerSocket.getInputStream()));
         }
 
         @Override
@@ -220,11 +221,15 @@ public class Server {
             }
         }
 
-        public  void close() {
+        public void quit() {
+            hasLeft = true;
             try {
                 playerSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Couldn't closer player socket");
+            } finally {
+                areStillPlayersPlaying();
+                broadcast(String.format(GameMessages.PLAYER_LEFT_GAME, name));
             }
         }
 
