@@ -3,7 +3,6 @@ import server.drawing.Drawing;
 import java.io.*;
 import java.net.Socket;
 
-
 public class Player {
     public static void main(String[] args) {
         Player player = new Player();
