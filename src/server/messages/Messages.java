@@ -3,6 +3,8 @@ package server.messages;
 public final class Messages {
     public static final String SERVER_STARTED = "Server started on port: %s";
     public static final String DEFAULT_NAME = "CLIENT-";
+    public static final String ASK_NAME = "Write your name!\n";
+    public static final String INVALID_NAME = "Invalid name.\n";
     public static final String CLIENT_ENTERED_CHAT = " entered the chat.";
     public static final String NO_SUCH_COMMAND = "⚠️ Invalid command!";
     public static final String COMMANDS_LIST = """

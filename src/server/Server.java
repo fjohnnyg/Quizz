@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 
 
 public class Server implements Runnable {
+    private static final int MAX_NUM_OF_PLAYERS = 2;
     private ServerSocket serverSocket;
     private ExecutorService service;
     private List<PlayerHandler> players;
@@ -20,6 +21,7 @@ public class Server implements Runnable {
     private boolean asTheme;
     private boolean isGameStarted;
     private boolean isGameEnded;
+    int numOfQuestions;
     public Server() {
         this.players = new CopyOnWriteArrayList<>();
         this.asTheme = false;
@@ -33,7 +35,7 @@ public class Server implements Runnable {
         int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
-        while (true) {
+        while (numberOfPlayers <= MAX_NUM_OF_PLAYERS) {
             acceptConnection(numberOfPlayers);
             numberOfPlayers++;
         }
@@ -44,6 +46,7 @@ public class Server implements Runnable {
             if (checkIfGameCanStart() && !isGameStarted) {
                 startGame();
             }
+            System.out.println("Not");
         }
     }
 
@@ -56,24 +59,31 @@ public class Server implements Runnable {
     }
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
+        Thread playerThread = new Thread(playerHandler);
+        playerThread.start();
         //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
         playerHandler.send(Messages.COMMANDS_LIST);
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
 
+    public boolean isAcceptingPlayers() {
+        return players.size() <= MAX_NUM_OF_PLAYERS && !isGameStarted;
+    }
+
     public boolean checkIfGameCanStart() {
-        //todo
-        //Number of players
-        //as theme
-        return  false;
+        return  !isAcceptingPlayers()/* &&
+                players.stream().filter(p -> !p.hasLeft)
+                .noneMatch(playerHandler -> playerHandler.getName() == "")*/;
     }
 
     public void startGame() {
         //todo
         themeChooser();
-
+        while (numOfQuestions < 10) {
+            broadCast(sendQuestion());
+            numOfQuestions++;
+        }
     }
-
 
     public void themeChooser() {
         int rand = (int) (Math.random() * (4 - 1) +1);
@@ -173,10 +183,10 @@ public class Server implements Runnable {
         @Override
         public void run() {
             addPlayer(this);
-            send(Messages.NO_MESSAGE_YET);
+            send(Messages.ASK_NAME);
             name = getAnswer();
             while (!name.matches("[a-zA-Z]+")){
-                send(Messages.NO_MESSAGE_YET);
+                send(Messages.INVALID_NAME);
                 name = getAnswer();
             }
             quit();
