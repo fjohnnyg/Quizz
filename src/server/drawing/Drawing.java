@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public class Drawing {
-    int width = 200;
+    int width = 150;
     int height = 20;
 
     public void createLogo() {

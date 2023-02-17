@@ -152,7 +152,7 @@ public class Server {
             //}
         }
 
-        public String getAnswer() {
+/*        public String getAnswer() {
             String message = null;
             try {
                 message = in.readLine();
@@ -164,7 +164,7 @@ public class Server {
                 }
             }
             return message;
-        }
+        }*/
 
         private boolean isTheme(String message) {
             return message.equals("1") ||
