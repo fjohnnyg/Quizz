@@ -3,9 +3,7 @@ package server;
 import server.commands.Command;
 import server.messages.Messages;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.*;
@@ -14,26 +12,38 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class Server {
+public class Server implements Runnable {
     private ServerSocket serverSocket;
     private ExecutorService service;
     private List<PlayerHandler> players;
-    private Question questions = new Question();
+    private Question questions;
     private boolean asTheme;
+    private boolean isGameStarted;
+    private boolean isGameEnded;
     public Server() {
         this.players = new CopyOnWriteArrayList<>();
         this.asTheme = false;
+        this.isGameEnded = false;
+        this.questions = new Question();
     }
 
     public void start(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        service = Executors.newCachedThreadPool();
-        int numberOfConnections = 0;
+        this.serverSocket = new ServerSocket(port);
+        this.service = Executors.newCachedThreadPool();
+        int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
         while (true) {
-            acceptConnection(numberOfConnections);
-            numberOfConnections++;
+            acceptConnection(numberOfPlayers);
+            numberOfPlayers++;
+        }
+    }
+    @Override
+    public void run() {
+        while (!isGameEnded) {
+            if (checkIfGameCanStart() && !isGameStarted) {
+                startGame();
+            }
         }
     }
 
@@ -51,24 +61,28 @@ public class Server {
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
 
-/*    public void startGame(PlayerHandler playerHandler) {
-        int questionNumber = 0;
-        int gameSize = 10;
-        while (questionNumber < gameSize) {
-            //themeChooser();
-            playerHandler.send(sendQuestion(questionNumber));
-            playerHandler.run();
-            questionNumber++;
+    public boolean checkIfGameCanStart() {
+        //todo
+        //Number of players
+        //as theme
+        return  false;
+    }
 
-        }
-    }*/
+    public void startGame() {
+        //todo
+        themeChooser();
 
-    public void themeChooser(String theme) {
+    }
+
+
+    public void themeChooser() {
+        int rand = (int) (Math.random() * (4 - 1) +1);
         try {
-            switch (theme) {
-                case "1" -> questions.createListOfQuestion("SPORTS");
-                case "2" -> questions.createListOfQuestion("GEOGRAPHY");
-                case "3" -> questions.createListOfQuestion("ART");
+            switch (rand) {
+                case 1 -> questions.createListOfQuestion("SPORTS");
+                case 2 -> questions.createListOfQuestion("GEOGRAPHY");
+                case 3 -> questions.createListOfQuestion("ART");
+                case 4 -> questions.createListOfQuestion("ALL THEMES");
                 default -> throw new IllegalStateException();
             }
         } catch (IOException e) {
@@ -80,10 +94,13 @@ public class Server {
         return questions.getQuestion();
     }
 
-    private boolean verifyAnswer(String message) {
-        String correctAnswer = questions.getCorrectAnswer();
-        return correctAnswer.equalsIgnoreCase(message);
+
+    public void broadCast(String message) {
+        players.stream()
+                .filter(p -> !p.hasLeft)
+                .forEach(player -> player.send(message));
     }
+
     public void broadcast(String name, String message) {
         players.stream()
                 .filter(handler -> !handler.getName().equals(name))
@@ -106,53 +123,66 @@ public class Server {
                 .findFirst();
     }
 
+    public void areStillPlayersPlaying() {
+        if (players == null) {
+            endGame();
+        }
+    }
+
+    public void endGame() {
+        broadCast(Messages.NO_MESSAGE_YET);
+        players.stream()
+                .filter(p -> !p.hasLeft)
+                .forEach(PlayerHandler::quit);
+        isGameEnded = true;
+    }
+
+    public boolean isAsTheme() {
+        return asTheme;
+    }
+
+    public boolean isGameEnded() {
+        return isGameEnded;
+    }
+
+    public Question getQuestions() {
+        return questions;
+    }
+
+
     public class PlayerHandler implements Runnable {
 
         private String name;
         private Socket playerSocket;
         private BufferedWriter out;
         private String message;
+        private boolean hasLeft;
+        private BufferedReader in;
 
-        public PlayerHandler(Socket playerSocket, String name) throws IOException {
+        public PlayerHandler(Socket playerSocket, String name) {
             this.playerSocket = playerSocket;
             this.name = name;
-            this.out = new BufferedWriter(new OutputStreamWriter(playerSocket.getOutputStream()));
+            try {
+                this.out = new BufferedWriter(new OutputStreamWriter(playerSocket.getOutputStream()));
+                this.in = new BufferedReader(new InputStreamReader(playerSocket.getInputStream()));
+            } catch (IOException e) {
+                quit();
+            }
         }
 
         @Override
         public void run() {
             addPlayer(this);
-            /*int questionNumber = 0;
-            int gameSize = 10;
-            while (questionNumber < gameSize) {*/
-            try {
-                Scanner in = new Scanner(playerSocket.getInputStream());
-                while (in.hasNext()) {
-                    message = in.next();
-                    System.out.println(message);
-                    if (isCommand(message)) {
-                        dealWithCommand(message);
-                    }
-                    if (isTheme(message)) {
-                        dealWithTheme(message);
-                    }
-                    if (isAnswer(message)) {
-                        dealWithAnswer(message);
-                        this.send(sendQuestion());
-                    }
-                    //themeChooser(message);
-                    //this.send(sendQuestion());
-                    //this.send(Messages.NO_SUCH_COMMAND + "\n" + Messages.COMMANDS_LIST);
-                }
-            } catch (IOException e) {
-                    System.err.println(Messages.CLIENT_ERROR + e.getMessage());
-                } finally {
-                    removePlayer(this);
-                }
-            //}
+            send(Messages.NO_MESSAGE_YET);
+            name = getAnswer();
+            while (!name.matches("[a-zA-Z]+")){
+                send(Messages.NO_MESSAGE_YET);
+                name = getAnswer();
+            }
+            quit();
         }
 
-/*        public String getAnswer() {
+        public String getAnswer() {
             String message = null;
             try {
                 message = in.readLine();
@@ -164,8 +194,8 @@ public class Server {
                 }
             }
             return message;
-        }*/
-
+        }
+/*
         private boolean isTheme(String message) {
             return message.equals("1") ||
                     message.equals("2") ||
@@ -207,7 +237,7 @@ public class Server {
             }
 
             command.getHandler().execute(Server.this, this);
-        }
+        }*/
 
         public void send(String message) {
             try {
@@ -220,11 +250,15 @@ public class Server {
             }
         }
 
-        public  void close() {
+        public void quit() {
+            hasLeft = true;
             try {
                 playerSocket.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("Couldn't closer player socket");
+            } finally {
+                areStillPlayersPlaying();
+                broadCast(Messages.NO_MESSAGE_YET);//Player x left the game
             }
         }
 
@@ -239,7 +273,6 @@ public class Server {
         public String getMessage() {
             return message;
         }
-
     }
 
 }

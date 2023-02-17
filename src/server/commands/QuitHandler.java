@@ -9,6 +9,6 @@ public class QuitHandler implements CommandHandler {
     public void execute(Server server, Server.PlayerHandler playerHandler) {
         server.removePlayer(playerHandler);
         server.broadcast(playerHandler.getName(), playerHandler.getName() + Messages.CLIENT_DISCONNECTED);
-        playerHandler.close();
+        playerHandler.quit();
     }
 }
