@@ -1,6 +1,5 @@
 package server;
 
-import server.commands.Command;
 import server.messages.Messages;
 
 import java.io.*;
@@ -12,17 +11,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class Server implements Runnable {
+public class Server {
+    private static final int MAX_NUM_OF_PLAYERS = 2;
     private ServerSocket serverSocket;
     private ExecutorService service;
     private List<PlayerHandler> players;
     private Question questions;
-    private boolean asTheme;
+    private boolean hasTheme;
     private boolean isGameStarted;
     private boolean isGameEnded;
+    int numOfQuestions;
     public Server() {
         this.players = new CopyOnWriteArrayList<>();
-        this.asTheme = false;
+        this.hasTheme = false;
         this.isGameEnded = false;
         this.questions = new Question();
     }
@@ -33,19 +34,26 @@ public class Server implements Runnable {
         int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
-        while (true) {
+        while (numberOfPlayers <= MAX_NUM_OF_PLAYERS) {
             acceptConnection(numberOfPlayers);
             numberOfPlayers++;
         }
-    }
-    @Override
-    public void run() {
-        while (!isGameEnded) {
-            if (checkIfGameCanStart() && !isGameStarted) {
-                startGame();
-            }
+        while(!checkIfGameCanStart()){
+            System.out.println("qq cosia");
+            checkIfGameCanStart();
         }
+        startGame();
+//        while (!isGameEnded) {
+//            if (checkIfGameCanStart() && !isGameStarted) {
+//
+//            }
+ //       }
     }
+//    @Override
+//    public void run() {
+//
+//            System.out.println("Not");
+//        }
 
     public void acceptConnection(int numberOfConnections) throws IOException {
         Socket clientSocket = serverSocket.accept();
@@ -62,18 +70,22 @@ public class Server implements Runnable {
     }
 
     public boolean checkIfGameCanStart() {
-        //todo
-        //Number of players
-        //as theme
-        return  false;
+        return  !isAcceptingPlayers()/* &&
+                players.stream().filter(p -> !p.hasLeft)
+                .noneMatch(playerHandler -> playerHandler.getName() == "")*/;
     }
 
+    public boolean isAcceptingPlayers() {
+        return players.size() == MAX_NUM_OF_PLAYERS && !isGameStarted;
+    }
     public void startGame() {
-        //todo
+        checkIfGameCanStart();
         themeChooser();
-
+        while (numOfQuestions < 10) {
+            broadCast(sendQuestion());
+            numOfQuestions++;
+        }
     }
-
 
     public void themeChooser() {
         int rand = (int) (Math.random() * (4 - 1) +1);
@@ -137,8 +149,8 @@ public class Server implements Runnable {
         isGameEnded = true;
     }
 
-    public boolean isAsTheme() {
-        return asTheme;
+    public boolean isHasTheme() {
+        return hasTheme;
     }
 
     public boolean isGameEnded() {
@@ -172,14 +184,25 @@ public class Server implements Runnable {
 
         @Override
         public void run() {
+
             addPlayer(this);
-            send(Messages.NO_MESSAGE_YET);
+
+            send(Messages.ASK_NAME);
             name = getAnswer();
             while (!name.matches("[a-zA-Z]+")){
-                send(Messages.NO_MESSAGE_YET);
+                send(Messages.ASK_NAME);
                 name = getAnswer();
             }
+
+            broadCast(String.format(Messages.WELCOME, name));
+            send("Waiting players");
+            while (!isGameEnded) {
+                if (Thread.interrupted()) {
+                    return;
+                }
+            }
             quit();
+
         }
 
         public String getAnswer() {
@@ -201,41 +224,34 @@ public class Server implements Runnable {
                     message.equals("2") ||
                     message.equals("3");
         }
-
         private void dealWithTheme(String message) {
             themeChooser(message);
             this.send(sendQuestion());
         }
-
         private boolean isAnswer(String message) {
             return (message.equalsIgnoreCase("a") ||
                     message.equalsIgnoreCase("b") ||
                     message.equalsIgnoreCase("c") ||
                     message.equalsIgnoreCase("d"));
         }
-
         private void dealWithAnswer(String message) {
             if (verifyAnswer(message))
                 this.send("Your answer is correct!");
             if (!verifyAnswer(message))
                 this.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
         }
-
         private boolean isCommand(String message) {
             return message.startsWith("/");
         }
-
         private void dealWithCommand(String message) throws IOException {
             String description = message.split(" ")[0];
             Command command = Command.getCommandFromDescription(description);
-
             if (command == null) {
                 out.write(Messages.NO_SUCH_COMMAND);
                 out.newLine();
                 out.flush();
                 return;
             }
-
             command.getHandler().execute(Server.this, this);
         }*/
 
