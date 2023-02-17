@@ -19,8 +19,10 @@ public class Server {
     private ExecutorService service;
     private List<PlayerHandler> players;
     private Question questions = new Question();
+    private boolean asTheme;
     public Server() {
-        players = new CopyOnWriteArrayList<>();
+        this.players = new CopyOnWriteArrayList<>();
+        this.asTheme = false;
     }
 
     public void start(int port) throws IOException {
@@ -150,6 +152,19 @@ public class Server {
             //}
         }
 
+        public String getAnswer() {
+            String message = null;
+            try {
+                message = in.readLine();
+            } catch (IOException | NullPointerException e) {
+                quit();
+            } finally {
+                if (message == null) {
+                    quit();
+                }
+            }
+            return message;
+        }
 
         private boolean isTheme(String message) {
             return message.equals("1") ||
