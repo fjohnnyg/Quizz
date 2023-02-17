@@ -16,6 +16,7 @@ public class Question {
     private String[] answersLetter = {"", "A. ", "B. ", "C. "};
     private List<String> correctAnswersList = new ArrayList<>();
     private String correctAnswer;
+    private String correctAnswerValue;
     private int maxQuestions = 10;
 
     public Question(){
@@ -25,29 +26,37 @@ public class Question {
     public static void main(String[] args) throws IOException {
         Question teste = new Question();
 
-        teste.createListOfQuestion("ALL THEMES");
+        teste.createListOfQuestion("GEOGRAPHY");
     }
 
     /**
-     * This method goes to the questions.txt and select the theme defined by the players
+     * This method receives the theme chosen by the player and create the list of questions from questions.txt
      * Puts the questions into the list in a random order
      * @param gameTheme is the Theme chosen
      */
     public void createListOfQuestion(String gameTheme) throws IOException {
 
-        List<String> temp = new ArrayList<>();
+        List<String> tempQuestionsList = new ArrayList<>();
 
         BufferedReader readerQuestionTxt = new BufferedReader(new FileReader("resources/questions.txt"));
 
         if (!gameTheme.equals("ALL THEMES"))
-            createListOneTheme(gameTheme, temp, readerQuestionTxt);
+            createListOneTheme(gameTheme, tempQuestionsList, readerQuestionTxt);
         else
-            createListAllThemes(temp);
+            createListAllThemes(tempQuestionsList);
 
         System.out.println(questionList.toString());
         ////
         randomQuestions();
     }
+
+    /**
+     * this method creates the List of the chosen theme
+     * @param gameTheme
+     * @param temp
+     * @param readerQuestionTxt
+     * @throws IOException
+     */
 
     public void createListOneTheme(String gameTheme, List<String> temp, BufferedReader readerQuestionTxt) throws IOException {
 
@@ -58,10 +67,12 @@ public class Question {
             if (line.contains(gameTheme)) {
 
                 while (!line.isEmpty()) {
-                    for (int i = 0; i < 4; i++) {
-                        temp.add(line.replace(gameTheme + ": ", ""));
+                        temp.add(line.substring(line.indexOf(": ")+2, line.length()));
+                    for (int i = 0; i < 3; i++) {
                         line = readerQuestionTxt.readLine();
+                        temp.add(line.substring(3, line.length()));
                     }
+                    line = readerQuestionTxt.readLine();
                     this.questionList.add(new ArrayList(temp));
                     System.out.println(temp);
                     temp.clear();
@@ -72,11 +83,38 @@ public class Question {
         }
     }
 
+    /**
+     * this method creates the List with questions of every themes
+     * the choice is made randomly
+     * @param temp
+     * @throws IOException
+     */
+
     public void createListAllThemes(List<String> temp) throws IOException {
 
         createCleanFile();
 
         Path finalFilePath = Paths.get("resources/tempQuestions.txt");
+        BufferedReader questionReader = new BufferedReader(new FileReader(finalFilePath.toFile()));
+        String line = questionReader.readLine();
+        int randomQuestion;
+
+        while(line != null) {
+
+            temp.add(line.substring(line.indexOf(": ")+2, line.length()));
+
+            for (int i = 0; i < 3; i++) {
+                line = questionReader.readLine();
+                temp.add(line.substring(3, line.length()));
+            }
+
+            line = questionReader.readLine();
+
+            this.questionList.add(new ArrayList(temp));
+            System.out.println(temp);
+            temp.clear();
+        }
+        /*Path finalFilePath = Paths.get("resources/tempQuestions.txt");
         BufferedReader questionReader = new BufferedReader(new FileReader(finalFilePath.toFile()));
         String presentLine = "";
         int randomQuestion;
@@ -89,7 +127,6 @@ public class Question {
         while(questionList.size() < maxQuestions) {
 
             randomQuestion = (int) (Math.random() * jumpLines.size());
-            System.out.println("valor do random: " + randomQuestion);
             System.out.println(jumpLines);
             jumpLines.remove(randomQuestion);
 
@@ -103,46 +140,44 @@ public class Question {
             this.questionList.add(new ArrayList(temp));
             System.out.println(temp);
             temp.clear();
-        }
+        }*/
     }
 
-    private void createCleanFile() throws IOException {
-        Path originalFilePath = Paths.get("resources/questions.txt");
-        Path finalFilePath = Paths.get("resources/tempQuestions.txt");
-        System.out.println(Files.readAllLines(finalFilePath).get(0));
+    private void createCleanFile() {
 
-        Scanner txtFile = new Scanner(originalFilePath);
-        PrintWriter writer = new PrintWriter("resources/tempQuestions.txt");
+        try {
+            Path originalFilePath = Paths.get("resources/questions.txt");
+            Scanner txtFile = new Scanner(originalFilePath);
+            PrintWriter writer = new PrintWriter("resources/tempQuestions.txt");
 
-        while (txtFile.hasNext()) {
-            String line = txtFile.nextLine();
-            if (!line.isEmpty()) {
-                writer.write(line);
-                writer.write("\n");
+            while (txtFile.hasNext()) {
+                String line = txtFile.nextLine();
+                if (!line.isEmpty() && !line.contains("--FIM--")) {
+                    writer.write(line + "\n");
+                }
             }
+            txtFile.close();
+            writer.close();
+        } catch (IOException e){
+            e.printStackTrace();
         }
-
-        txtFile.close();
-        writer.close();
     }
 
     /**
      * Does the random of the questions and answers
-     * Updates the value of the correct answer
+     * Puts the value of the correct answers into an array
      */
 
     public void randomQuestions(){
         Collections.shuffle(questionList);
-        System.out.println(questionList.toString());
 
         for (int i = 0; i < questionList.size(); i++) {
-            this.correctAnswer = questionList.get(i).get(1).toString().substring(3);
-            correctAnswersList.add(this.correctAnswer);
-            //System.out.println(this.correctAnswer);
+            correctAnswersList.add(questionList.get(i).get(1).toString());
 
             Collections.shuffle(questionList.get(i).subList(1, 4));
-            System.out.println(questionList.get(i).get(1));
         }
+        System.out.println(questionList);
+        System.out.println(correctAnswersList.toString());
     }
 
     /**
@@ -157,14 +192,18 @@ public class Question {
         String fullQuestionToServer = questionList.get(0).get(0).toString() + "\n";
 
         for (int i = 1; i < questionList.get(0).size(); i++) {
-            fullQuestionToServer += answersLetter[i] + questionList.get(0).get(i).toString().substring(3) + "\n";
+            //fullQuestionToServer += answersLetter[i] + questionList.get(0).get(i).toString().substring(3) + "\n";
+            fullQuestionToServer += answersLetter[i] + questionList.get(0).get(i).toString() + "\n";
         }
 
-        //this.correctAnswer = String.valueOf(fullQuestionToServer.charAt(fullQuestionToServer.indexOf(this.correctAnswer)-3));
-        this.correctAnswer = String.valueOf(fullQuestionToServer.charAt(fullQuestionToServer.indexOf(correctAnswersList.get(0))-3));
+        System.out.println(fullQuestionToServer);
 
-        /*getQuestion();
-        getCorrectAnswer();*/
+        correctAnswer = String.valueOf(fullQuestionToServer.charAt(fullQuestionToServer.indexOf(correctAnswersList.get(0))-3));
+        System.out.println(correctAnswer);
+
+        correctAnswerValue = correctAnswersList.get(0);
+        System.out.println(correctAnswerValue);
+
         removeQuestionFromList();
 
         return fullQuestionToServer;
@@ -173,12 +212,13 @@ public class Question {
     public void removeQuestionFromList(){
         questionList.remove(0);
         correctAnswersList.remove(0);
-        System.out.println(questionList);
-        System.out.println(correctAnswersList);
+    }
+
+    public String getCorrectAnswerValue() {
+        return correctAnswerValue;
     }
 
     public String getCorrectAnswer(){
-        //System.out.println(correctAnswer);
         return correctAnswer;
     }
     public String getQuestion(){
