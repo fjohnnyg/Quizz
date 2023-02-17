@@ -1,6 +1,6 @@
 package server.messages;
 
-public abstract class Messages {
+public final class Messages {
     public static final String SERVER_STARTED = "Server started on port: %s";
     public static final String DEFAULT_NAME = "CLIENT-";
     public static final String CLIENT_ENTERED_CHAT = " entered the chat.";
@@ -24,6 +24,7 @@ public abstract class Messages {
     public static final String SELF_NAME_CHANGED = "You changed your name to: %s";
     public static final String NAME_CHANGED = "%s changed name to: %s";
     public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
+    public static final String NO_MESSAGE_YET = "Define a message for this, please";
 
 
 }
