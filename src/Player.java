@@ -1,4 +1,5 @@
 import server.drawing.Drawing;
+import server.messages.Messages;
 
 import java.io.*;
 import java.net.Socket;
@@ -56,7 +57,7 @@ public class Player {
                         System.exit(0);
                     }
                 } catch (IOException e) {
-                    System.out.println("Something went wrong with the server. Connection is closing...");
+                    System.out.println(Messages.SERVER_CLOSED);
                     try {
                         socket.close();
                     } catch (IOException ex) {

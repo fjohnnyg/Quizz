@@ -25,6 +25,7 @@ public final class Messages {
     public static final String NAME_CHANGED = "%s changed name to: %s";
     public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
     public static final String NO_MESSAGE_YET = "Define a message for this, please";
-
+    public static final String SERVER_CLOSED = "Something went wrong. Please restart the server";
+    public static final String ASK_NAME = "Please insert your name";
 
 }
