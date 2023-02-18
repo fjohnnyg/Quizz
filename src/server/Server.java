@@ -40,13 +40,13 @@ public class Server {
         }
     }
 
-    public void runGame() {
+    public void runGame(PlayerHandler playerHandler) {
 
         while (!isGameEnded) {
 
             if (checkIfGameCanStart() && !isGameStarted) {
                 try {
-                    startGame();
+                    startGame(playerHandler);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -80,33 +80,34 @@ public class Server {
                 .noneMatch(playerHandler -> playerHandler.getName() == "");
     }
 
-    public synchronized void startGame() throws InterruptedException {
-        //todo
+    public void startGame(PlayerHandler playerHandler) throws InterruptedException {
         themeChooser();
         while (numOfQuestions < 10) {
             broadCast(sendQuestion());
-            for (PlayerHandler playerHandler : players) {
-                if (!playerHandler.hasLeft) {
+//            for (PlayerHandler playerHandler : players) {
+//                if (!playerHandler.hasLeft) {
                     String optionsRegex = "[abc]";
                     String option;
                     option = getPlayerAnswer(playerHandler, optionsRegex, playerHandler.getName() + "Choose a, b or c");
-                    verifyAnswer(option);
                     dealWithAnswer(playerHandler, option);
-                    //wait(3000);
                 }
-            }
+//            }
             numOfQuestions++;
-        }
+//        }
     }
 
-    private synchronized String getMessageFromBuffer(PlayerHandler playerHandler){
-        String answer=playerHandler.getAnswer();
+    public void readyForNextQuestion() {
+
+    }
+
+    private String getMessageFromBuffer(PlayerHandler playerHandler){
+        String answer = playerHandler.getInput();
         return answer!=null? answer.toLowerCase(): null;
     }
 
-    private synchronized String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
+    private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
         String answer;
-        answer=getMessageFromBuffer(playerHandler);
+        answer = getMessageFromBuffer(playerHandler);
         while (!validateAnswer(answer, regex)  &&  answer!=null) {
             playerHandler.send(playerHandler.getName() + invalidMessage);
             answer = getMessageFromBuffer(playerHandler);
@@ -114,7 +115,7 @@ public class Server {
         return answer;
     }
 
-    private synchronized boolean validateAnswer(String playerAnswer, String regex) {
+    private boolean validateAnswer(String playerAnswer, String regex) {
         if(playerAnswer==null){ //occurs when suddenly a player closes client
             return false;
         }
@@ -124,12 +125,12 @@ public class Server {
         return playerAnswer.toLowerCase().matches(regex);
     }
 
-    private synchronized boolean verifyAnswer(String message) {
+    private boolean verifyAnswer(String message) {
         String correctAnswer = questions.getCorrectAnswer();
         return correctAnswer.equalsIgnoreCase(message);
     }
 
-    private synchronized void dealWithAnswer(PlayerHandler playerHandler, String message) {
+    private void dealWithAnswer(PlayerHandler playerHandler, String message) {
         if (verifyAnswer(message))
             playerHandler.send("Your answer is correct!");
         if (!verifyAnswer(message))
@@ -236,14 +237,14 @@ public class Server {
             addPlayer(this);
 
             send(Messages.ASK_NAME);
-            name = getAnswer();
+            name = getInput();
             while (!name.matches("[a-zA-Z]+")){
                 send(Messages.ASK_NAME);
-                name = getAnswer();
+                name = getInput();
             }
 
             send(String.format(Messages.WELCOME, name));
-            runGame();
+            runGame(this);
             while (!isGameEnded) {
                 if (Thread.interrupted()) {
                     return;
@@ -253,7 +254,7 @@ public class Server {
 
         }
 
-        public String getAnswer() {
+        public String getInput() {
             String message = null;
             try {
                 message = in.readLine();
