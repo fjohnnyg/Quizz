@@ -75,8 +75,6 @@ public class Server {
     }
 
     public boolean checkIfGameCanStart() {
-        players.forEach(p -> System.out.println("Testing player |"+p.getName()+"|"));
-
         return  !isAcceptingPlayers() &&
             players.stream()
                 .filter(p -> !p.hasLeft)
@@ -255,7 +253,8 @@ public class Server {
              * temporarily stores a user input while testing if it is a valid `name`
              */
             String input = getInput();
-            while (!input.matches("[a-z]+/i")){
+            while (!input.matches("[a-zA-Z]+")){
+                System.out.println("coiso"+input);
                 send(Messages.ASK_NAME);
                 input = getInput();
             }
