@@ -40,13 +40,13 @@ public class Server {
         }
     }
 
-    public void runGame(PlayerHandler playerHandler) {
+    public void runGame() {
 
         while (!isGameEnded) {
 
             if (checkIfGameCanStart() && !isGameStarted) {
                 try {
-                    startGame(playerHandler);
+                    startGame();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -80,20 +80,23 @@ public class Server {
                 .noneMatch(playerHandler -> playerHandler.getName() == "");
     }
 
-    public void startGame(PlayerHandler playerHandler) throws InterruptedException {
+    public void startGame() throws InterruptedException {
+        isGameStarted = true;
         themeChooser();
+        String p1Answer;
+        String p2Answer;
+        String[] option = new String[MAX_NUM_OF_PLAYERS];
         while (numOfQuestions < 10) {
+            String optionsRegex = "[abc]";
             broadCast(sendQuestion());
-//            for (PlayerHandler playerHandler : players) {
-//                if (!playerHandler.hasLeft) {
-                    String optionsRegex = "[abc]";
-                    String option;
-                    option = getPlayerAnswer(playerHandler, optionsRegex, playerHandler.getName() + "Choose a, b or c");
-                    dealWithAnswer(playerHandler, option);
-                }
-//            }
+            for (int i = 0; i <= option.length - 1; i++) {
+                option[i] = getPlayerAnswer(players.get(i), optionsRegex, players.get(i).getName() + "Please choose a, b or c");
+            }
+            p1Answer = option[0];
+            p2Answer = option[1];
+            dealWithAnswer(p1Answer, p2Answer);
             numOfQuestions++;
-//        }
+        }
     }
 
     public void readyForNextQuestion() {
@@ -108,7 +111,7 @@ public class Server {
     private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
         String answer;
         answer = getMessageFromBuffer(playerHandler);
-        while (!validateAnswer(answer, regex)  &&  answer!=null) {
+        while (!validateAnswer(answer, regex)/*  &&  answer!=null*/) {
             playerHandler.send(playerHandler.getName() + invalidMessage);
             answer = getMessageFromBuffer(playerHandler);
         }
@@ -116,9 +119,9 @@ public class Server {
     }
 
     private boolean validateAnswer(String playerAnswer, String regex) {
-        if(playerAnswer==null){ //occurs when suddenly a player closes client
+/*        if(playerAnswer==null){ //occurs when suddenly a player closes client
             return false;
-        }
+        }*/
         if (playerAnswer.length() != 1) {
             return false;
         }
@@ -130,11 +133,15 @@ public class Server {
         return correctAnswer.equalsIgnoreCase(message);
     }
 
-    private void dealWithAnswer(PlayerHandler playerHandler, String message) {
-        if (verifyAnswer(message))
-            playerHandler.send("Your answer is correct!");
-        if (!verifyAnswer(message))
-            playerHandler.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
+    private void dealWithAnswer(String p1Answer, String p2Answer) {
+        if (verifyAnswer(p1Answer))
+            players.get(0).send("Your answer is correct!");
+        if (!verifyAnswer(p1Answer))
+            players.get(0).send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
+        if (verifyAnswer(p2Answer))
+            players.get(1).send("Your answer is correct!");
+        if (!verifyAnswer(p2Answer))
+            players.get(1).send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
     }
 
     public void themeChooser() {
@@ -244,7 +251,7 @@ public class Server {
             }
 
             send(String.format(Messages.WELCOME, name));
-            runGame(this);
+            runGame();
             while (!isGameEnded) {
                 if (Thread.interrupted()) {
                     return;
