@@ -1,6 +1,5 @@
 package server;
 
-import server.commands.Command;
 import server.messages.Messages;
 
 import java.io.*;
@@ -52,6 +51,8 @@ public class Server {
                     e.printStackTrace();
                 }
             }
+            System.out.println("Waiting players");
+            break;
         }
         System.out.println("Fim");
     }
@@ -79,16 +80,60 @@ public class Server {
                 .noneMatch(playerHandler -> playerHandler.getName() == "");
     }
 
-    public void startGame() throws InterruptedException {
+    public synchronized void startGame() throws InterruptedException {
         //todo
-        String answer;
         themeChooser();
         while (numOfQuestions < 10) {
             broadCast(sendQuestion());
-            wait(5000);
-            Command.START.getHandler();
+            for (PlayerHandler playerHandler : players) {
+                if (!playerHandler.hasLeft) {
+                    String optionsRegex = "[abc]";
+                    String option;
+                    option = getPlayerAnswer(playerHandler, optionsRegex, playerHandler.getName() + "Choose a, b or c");
+                    verifyAnswer(option);
+                    dealWithAnswer(playerHandler, option);
+                    //wait(3000);
+                }
+            }
             numOfQuestions++;
         }
+    }
+
+    private synchronized String getMessageFromBuffer(PlayerHandler playerHandler){
+        String answer=playerHandler.getAnswer();
+        return answer!=null? answer.toLowerCase(): null;
+    }
+
+    private synchronized String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
+        String answer;
+        answer=getMessageFromBuffer(playerHandler);
+        while (!validateAnswer(answer, regex)  &&  answer!=null) {
+            playerHandler.send(playerHandler.getName() + invalidMessage);
+            answer = getMessageFromBuffer(playerHandler);
+        }
+        return answer;
+    }
+
+    private synchronized boolean validateAnswer(String playerAnswer, String regex) {
+        if(playerAnswer==null){ //occurs when suddenly a player closes client
+            return false;
+        }
+        if (playerAnswer.length() != 1) {
+            return false;
+        }
+        return playerAnswer.toLowerCase().matches(regex);
+    }
+
+    private synchronized boolean verifyAnswer(String message) {
+        String correctAnswer = questions.getCorrectAnswer();
+        return correctAnswer.equalsIgnoreCase(message);
+    }
+
+    private synchronized void dealWithAnswer(PlayerHandler playerHandler, String message) {
+        if (verifyAnswer(message))
+            playerHandler.send("Your answer is correct!");
+        if (!verifyAnswer(message))
+            playerHandler.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
     }
 
     public void themeChooser() {
@@ -197,8 +242,7 @@ public class Server {
                 name = getAnswer();
             }
 
-            broadCast(String.format(Messages.WELCOME, name));
-            send("Waiting players");
+            send(String.format(Messages.WELCOME, name));
             runGame();
             while (!isGameEnded) {
                 if (Thread.interrupted()) {
@@ -269,6 +313,7 @@ public class Server {
         public void send(String message) {
             try {
                 out.write(message);
+                out.newLine();
                 out.flush();
             } catch (IOException e) {
                 removePlayer(this);
