@@ -18,7 +18,7 @@ public class startHandler implements CommandHandler {
             optionsRegex = "[abc]";
         }
         server.broadCast(server.sendQuestion());
-        option = getPlayerAnswer(message, optionsRegex, playerHandler.getName() + Messages.NO_MESSAGE_YET);//choose a, b or c
+        option = getPlayerAnswer(message, optionsRegex, playerHandler.getName() + "Choose a, b or c");//choose a, b or c
     }
 
     private String getMessageFromBuffer(){

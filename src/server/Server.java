@@ -12,7 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class Server implements Runnable {
+public class Server {
     private static final int MAX_NUM_OF_PLAYERS = 2;
     private ServerSocket serverSocket;
     private ExecutorService service;
@@ -35,52 +35,58 @@ public class Server implements Runnable {
         int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
-        while (numberOfPlayers <= MAX_NUM_OF_PLAYERS) {
+        while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
             acceptConnection(numberOfPlayers);
             numberOfPlayers++;
         }
     }
-    @Override
-    public void run() {
+
+    public void runGame() {
+
         while (!isGameEnded) {
+
             if (checkIfGameCanStart() && !isGameStarted) {
-                startGame();
+                try {
+                    startGame();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-            System.out.println("Not");
         }
+        System.out.println("Fim");
     }
 
     public void acceptConnection(int numberOfConnections) throws IOException {
         Socket clientSocket = serverSocket.accept();
         PlayerHandler playerHandler =
-                new PlayerHandler(clientSocket,
-                        Messages.DEFAULT_NAME + numberOfConnections);
+                new PlayerHandler(clientSocket);
         service.submit(playerHandler);
     }
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
-        Thread playerThread = new Thread(playerHandler);
-        playerThread.start();
         //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
         playerHandler.send(Messages.COMMANDS_LIST);
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
 
     public boolean isAcceptingPlayers() {
-        return players.size() <= MAX_NUM_OF_PLAYERS && !isGameStarted;
+        return players.size() < MAX_NUM_OF_PLAYERS && !isGameStarted;
     }
 
     public boolean checkIfGameCanStart() {
-        return  !isAcceptingPlayers()/* &&
+        return  !isAcceptingPlayers() &&
                 players.stream().filter(p -> !p.hasLeft)
-                .noneMatch(playerHandler -> playerHandler.getName() == "")*/;
+                .noneMatch(playerHandler -> playerHandler.getName() == "");
     }
 
-    public void startGame() {
+    public void startGame() throws InterruptedException {
         //todo
+        String answer;
         themeChooser();
         while (numOfQuestions < 10) {
             broadCast(sendQuestion());
+            wait(5000);
+            Command.START.getHandler();
             numOfQuestions++;
         }
     }
@@ -162,16 +168,15 @@ public class Server implements Runnable {
 
     public class PlayerHandler implements Runnable {
 
-        private String name;
+        private String name = "";
         private Socket playerSocket;
         private BufferedWriter out;
         private String message;
         private boolean hasLeft;
         private BufferedReader in;
 
-        public PlayerHandler(Socket playerSocket, String name) {
+        public PlayerHandler(Socket playerSocket) {
             this.playerSocket = playerSocket;
-            this.name = name;
             try {
                 this.out = new BufferedWriter(new OutputStreamWriter(playerSocket.getOutputStream()));
                 this.in = new BufferedReader(new InputStreamReader(playerSocket.getInputStream()));
@@ -182,14 +187,26 @@ public class Server implements Runnable {
 
         @Override
         public void run() {
+
             addPlayer(this);
+
             send(Messages.ASK_NAME);
             name = getAnswer();
             while (!name.matches("[a-zA-Z]+")){
-                send(Messages.INVALID_NAME);
+                send(Messages.ASK_NAME);
                 name = getAnswer();
             }
+
+            broadCast(String.format(Messages.WELCOME, name));
+            send("Waiting players");
+            runGame();
+            while (!isGameEnded) {
+                if (Thread.interrupted()) {
+                    return;
+                }
+            }
             quit();
+
         }
 
         public String getAnswer() {
@@ -252,7 +269,6 @@ public class Server implements Runnable {
         public void send(String message) {
             try {
                 out.write(message);
-                out.newLine();
                 out.flush();
             } catch (IOException e) {
                 removePlayer(this);
