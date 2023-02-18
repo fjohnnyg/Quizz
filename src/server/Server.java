@@ -35,7 +35,7 @@ public class Server {
         System.out.printf(Messages.SERVER_STARTED, port);
 
         while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
-            acceptConnection(numberOfPlayers);
+            acceptConnection();
             numberOfPlayers++;
         }
     }
@@ -57,7 +57,7 @@ public class Server {
         System.out.println("Fim");
     }
 
-    public void acceptConnection(int numberOfConnections) throws IOException {
+    public void acceptConnection() throws IOException {
         Socket clientSocket = serverSocket.accept();
         PlayerHandler playerHandler =
                 new PlayerHandler(clientSocket);
@@ -75,9 +75,12 @@ public class Server {
     }
 
     public boolean checkIfGameCanStart() {
+        players.forEach(p -> System.out.println("Testing player |"+p.getName()+"|"));
+
         return  !isAcceptingPlayers() &&
-                players.stream().filter(p -> !p.hasLeft)
-                .noneMatch(playerHandler -> playerHandler.getName() == "");
+            players.stream()
+                .filter(p -> !p.hasLeft)
+                .noneMatch(playerHandler -> "".equals(playerHandler.getName()));
     }
 
     public void startGame() throws InterruptedException {
@@ -90,7 +93,11 @@ public class Server {
             String optionsRegex = "[abc]";
             broadCast(sendQuestion());
             for (int i = 0; i <= option.length - 1; i++) {
-                option[i] = getPlayerAnswer(players.get(i), optionsRegex, players.get(i).getName() + "Please choose a, b or c");
+                option[i] = getPlayerAnswer(
+                        players.get(i),
+                        optionsRegex,
+                        players.get(i).getName() + "Please choose a, b or c"
+                );
             }
             p1Answer = option[0];
             p2Answer = option[1];
@@ -244,11 +251,15 @@ public class Server {
             addPlayer(this);
 
             send(Messages.ASK_NAME);
-            name = getInput();
-            while (!name.matches("[a-zA-Z]+")){
+            /*
+             * temporarily stores a user input while testing if it is a valid `name`
+             */
+            String input = getInput();
+            while (!input.matches("[a-z]+/i")){
                 send(Messages.ASK_NAME);
-                name = getInput();
+                input = getInput();
             }
+            name = input;
 
             send(String.format(Messages.WELCOME, name));
             runGame();

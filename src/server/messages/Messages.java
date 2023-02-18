@@ -20,6 +20,7 @@ public final class Messages {
     public static final String NO_SUCH_CLIENT = "The client you want to whisper to doesn't exists.";
     public static final String WHISPER = "(whisper)";
     public static final String WELCOME = "Welcome to Quizz! %s";
+    public static final String WELCOME_ASCII = "Welcome to Quizz!";
     public static final String CLIENT_ERROR = "Something went wrong with this client's connection. Error: ";
     public static final String CLIENT_ALREADY_EXISTS = "A client with this name already exists. Please choose another one.";
 
