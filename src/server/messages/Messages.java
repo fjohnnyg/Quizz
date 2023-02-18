@@ -41,6 +41,10 @@ public final class Messages {
     public static final String INVALID_NAME = "\u001B[31m" + "Put a valid name." + "\u001B[0m";
     public static final String START_GAME = "LET'S START THIS GAME!";
     public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
+    public static final String ART = "The theme you'll play is: ART";
+    public static final String SPORTS = "The theme you'll play is: SPORTS";
+    public static final String GEOGRAPHY = "The theme you'll play is: GEOGRAPHY";
+    public static final String ALL_THEMES = "You'll be playing ALL THEMES";
     public static final String CHOOSE_ANSWER = "Choose the answer A, B or C.";
 
 
@@ -49,5 +53,12 @@ public final class Messages {
     public static final String WRONG_ANSWER = "\u001B[31m" + "WRONG. " + "\u001B[0m" + "The right answer is: X";
     public static final String RIGHT_ANSWER = "\u001B[32m" + "RIGHT. " + "\u001B[0m" + "You won 1 point for this question!";
     public static final String WARNING = "If you leave a game now you'll loose all your points!";
-    public static final String GAME_OVER = "GAME OVER";
+    public static final String GAME_OVER = "\u001B[31m" + ":'######::::::'###::::'##::::'##:'########:::::'#######::'##::::'##:'########:'########::\n" +
+            "'##... ##::::'## ##::: ###::'###: ##.....:::::'##.... ##: ##:::: ##: ##.....:: ##.... ##:\n" +
+            " ##:::..::::'##:. ##:: ####'####: ##:::::::::: ##:::: ##: ##:::: ##: ##::::::: ##:::: ##:\n" +
+            " ##::'####:'##:::. ##: ## ### ##: ######:::::: ##:::: ##: ##:::: ##: ######::: ########::\n" +
+            " ##::: ##:: #########: ##. #: ##: ##...::::::: ##:::: ##:. ##:: ##:: ##...:::: ##.. ##:::\n" +
+            " ##::: ##:: ##.... ##: ##:.:: ##: ##:::::::::: ##:::: ##::. ## ##::: ##::::::: ##::. ##::\n" +
+            ". ######::: ##:::: ##: ##:::: ##: ########::::. #######::::. ###:::: ########: ##:::. ##:\n" +
+            ":......::::..:::::..::..:::::..::........::::::.......::::::...:::::........::..:::::..::" + "\u001B[0m";
 }
