@@ -14,22 +14,22 @@ public class startHandler implements CommandHandler {
         String optionsRegex = "[abcd]";
         String message = Messages.THEME_CHOOSER;
         String option;
-        if (server.isAsTheme()) {
+        if (server.isHasTheme()) {
             optionsRegex = "[abc]";
         }
         server.broadCast(server.sendQuestion());
-        option = getPlayerAnswer(message, optionsRegex, playerHandler.getName() + Messages.NO_MESSAGE_YET);//choose a, b or c
+        option = getPlayerAnswer(message, optionsRegex, playerHandler.getName() + Messages.CHOOSE_ANSWER);//choose a, b or c
     }
 
     private String getMessageFromBuffer(){
-        String answer=playerHandler.getAnswer();
-        return answer!=null? answer.toLowerCase(): null;
+        String answer = playerHandler.getValidName();
+        return answer != null ? answer.toLowerCase(): null;
     }
 
     private String getPlayerAnswer(String messageToSend, String regex, String invalidMessage){
         playerHandler.send(messageToSend);
         String answer;
-        answer=getMessageFromBuffer();
+        answer = getMessageFromBuffer();
         while (!validateAnswer(answer, regex)  &&  answer!=null) {
             playerHandler.send(playerHandler.getName() + invalidMessage);
             answer = getMessageFromBuffer();

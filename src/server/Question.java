@@ -23,11 +23,12 @@ public class Question {
         this.questionList = new ArrayList<>();
     }
 
-    public static void main(String[] args) throws IOException {
+    /*public static void main(String[] args) throws IOException {
         Question teste = new Question();
 
         teste.createListOfQuestion("GEOGRAPHY");
-    }
+        teste.questionToString();
+    }*/
 
     /**
      * This method receives the theme chosen by the player and create the list of questions from questions.txt

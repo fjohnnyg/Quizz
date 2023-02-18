@@ -1,4 +1,5 @@
 import server.drawing.Drawing;
+import server.messages.Messages;
 
 import java.io.*;
 import java.net.Socket;
@@ -7,7 +8,7 @@ public class Player {
     public static void main(String[] args) {
         Player player = new Player();
         Drawing welcome = new Drawing();
-        welcome.createLogo();
+        welcome.createLogo(Messages.WELCOME, "\u001B[36m");
         try {
             player.start("localhost", 8082);
         } catch (IOException e) {
