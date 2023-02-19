@@ -74,8 +74,8 @@ public class Server {
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
         //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
-        playerHandler.send(Messages.COMMANDS_LIST);
-        broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
+        playerHandler.send(Messages.GAME_INSTRUCTIONS);
+        broadcast(playerHandler.getName(), Messages.PLAYER_ENTERED_GAME);
     }
 
     public boolean isAcceptingPlayers() {
@@ -157,10 +157,10 @@ public class Server {
         int rand = (int) (Math.random() * (4 - 1) +1);
         try {
             switch (rand) {
-                case 1 -> questions.createListOfQuestion("SPORTS");
-                case 2 -> questions.createListOfQuestion("GEOGRAPHY");
-                case 3 -> questions.createListOfQuestion("ART");
-                case 4 -> questions.createListOfQuestion("ALL THEMES");
+                case 1 -> {questions.createListOfQuestion("SPORTS"); broadCast(Messages.SPORTS);}
+                case 2 -> {questions.createListOfQuestion("GEOGRAPHY");broadCast(Messages.GEOGRAPHY);}
+                case 3 -> {questions.createListOfQuestion("ART"); broadCast(Messages.ART);}
+                case 4 -> {questions.createListOfQuestion("ALL THEMES"); broadCast(Messages.ALL_THEMES);}
                 default -> throw new IllegalStateException();
             }
         } catch (IOException e) {
@@ -208,7 +208,7 @@ public class Server {
     }
 
     public void endGame() {
-        broadCast(Messages.NO_MESSAGE_YET);
+        broadCast(Messages.GAME_OVER);
         players.stream()
                 .filter(p -> !p.hasLeft)
                 .forEach(PlayerHandler::quit);
@@ -216,7 +216,7 @@ public class Server {
     }
 
     public boolean isHasTheme() {
-        return hasTheme;
+        return asTheme;
     }
 
     public boolean isGameEnded() {
@@ -269,7 +269,7 @@ public class Server {
 
             String input = getInput();
             while (!input.matches("[a-zA-Z]+")) {
-                send(Messages.ASK_NAME);
+                send(Messages.INVALID_NAME);
                 input = getInput();
             }
             name = input;
@@ -281,7 +281,7 @@ public class Server {
                         broadCast(sendQuestion());
                         String optionInput = getInput();
                         while (!validateAnswer(optionInput, VALID_ANSWER_REGEX) && optionInput != null) {
-                            this.send(this.getName() + "Please choose a, b or c.");
+                            this.send(this.getName() + Messages.CHOOSE_ANSWER);
                             optionInput = getInput();
                         }
                         answer = optionInput;
@@ -377,7 +377,7 @@ public class Server {
                 System.out.println("Couldn't closer player socket");
             } finally {
                 areStillPlayersPlaying();
-                broadCast(Messages.NO_MESSAGE_YET);//Player x left the game
+                broadCast(Messages.PLAYER_LEFT_GAME);//Player x left the game
             }
         }
 
@@ -393,5 +393,4 @@ public class Server {
             return message;
         }
     }
-
 }

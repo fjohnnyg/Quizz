@@ -75,6 +75,11 @@ SPORTS: What is the surname of a famous Portuguese marathon runner who won multi
 A. Rosa Mota
 B. Fernanda Ribeiro
 C. Patrícia Mamona
+SPORTS: Which country won the World Cup 2018?
+A. France
+B. Italy
+C. Brazil
+
 
 ART: Who painted the ceiling of the Sistine Chapel in Rome?
 A. Michelangelo
@@ -104,5 +109,17 @@ ART: Which art movement is Picasso known for?
 A. Cubism
 B. Surrealism
 C. Futurism
+ART: What type of art is art deco?
+A. Architecture
+B. Painting
+C. Sculpture
+ART: In which city can you find David by Michelangelo?
+A. Florence
+B. Rome
+C. Paris
+ART: In which Spanish city can you find the Salvador Dali Museum?
+A. Figueres
+B. Barcelona
+C. Madrid
 
 --FIM--

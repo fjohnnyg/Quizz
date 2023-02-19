@@ -20,7 +20,7 @@ public class Drawing {
         for (int y = 0; y < height; y++) {
             StringBuilder builder = new StringBuilder();
             for (int x = 0; x < width; x++) {
-                builder.append(logo.getRGB(x,y) == -16777216? " " : "$");
+                builder.append(logo.getRGB(x,y) == -16777216? " " : "\u001B[36m" + "$" + "\u001B[0m");
             }
             if (builder.toString().trim().isEmpty()){
                 continue;
