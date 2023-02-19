@@ -303,5 +303,4 @@ public class Server {
             this.name = name;
         }
     }
-
 }
