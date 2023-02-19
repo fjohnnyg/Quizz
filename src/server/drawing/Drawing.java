@@ -8,7 +8,7 @@ public class Drawing {
     int width = 150;
     int height = 20;
 
-    public void createLogo(String message, String color) {
+    public void createLogo(String message) {
         BufferedImage logo = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics graphics = logo.getGraphics();
         graphics.setFont(new Font("SansSerif", Font.BOLD, 15));
@@ -21,7 +21,7 @@ public class Drawing {
             StringBuilder builder = new StringBuilder();
             for (int x = 0; x < width; x++) {
                 //builder.append(logo.getRGB(x,y) == -16777216? " " : "$");
-                builder.append(logo.getRGB(x,y) == -16777216? " " : color + "$" + "\u001B[0m");
+                builder.append(logo.getRGB(x,y) == -16777216? " " : "\u001B[36m" + "$" + "\u001B[0m");
             }
             if (builder.toString().trim().isEmpty()){
                 continue;
