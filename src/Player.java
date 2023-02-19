@@ -7,8 +7,8 @@ import java.net.Socket;
 public class Player {
     public static void main(String[] args) {
         Player player = new Player();
-        Drawing welcome = new Drawing();
-        welcome.createLogo();
+        //Drawing welcome = new Drawing();
+        //welcome.createLogo();
         try {
             player.start("localhost", 8082);
         } catch (IOException e) {
@@ -17,6 +17,8 @@ public class Player {
     }
 
     private void start(String host, int port) throws IOException {
+        Drawing welcomeScreen = new Drawing();
+        welcomeScreen.createASCIIMessage(Messages.WELCOME_ASCII);
         Socket socket = new Socket(host, port);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));

@@ -3,6 +3,8 @@ package server.messages;
 public final class Messages {
     public static final String SERVER_STARTED = "Server started on port: %s";
     public static final String DEFAULT_NAME = "CLIENT-";
+    public static final String ASK_NAME = "Write your name!\n";
+    public static final String INVALID_NAME = "Invalid name.\n";
     public static final String CLIENT_ENTERED_CHAT = " entered the chat.";
     public static final String NO_SUCH_COMMAND = "⚠️ Invalid command!";
     public static final String COMMANDS_LIST = """
@@ -17,7 +19,8 @@ public final class Messages {
     public static final String WHISPER_INSTRUCTIONS = "Invalid whisper use. Correct use: '/whisper <username> <message>";
     public static final String NO_SUCH_CLIENT = "The client you want to whisper to doesn't exists.";
     public static final String WHISPER = "(whisper)";
-    public static final String WELCOME = "Welcome to Quizz!";
+    public static final String WELCOME = "Welcome to Quizz! %s";
+    public static final String WELCOME_ASCII = "Welcome to Quizz!";
     public static final String CLIENT_ERROR = "Something went wrong with this client's connection. Error: ";
     public static final String CLIENT_ALREADY_EXISTS = "A client with this name already exists. Please choose another one.";
 

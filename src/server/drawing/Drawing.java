@@ -8,14 +8,14 @@ public class Drawing {
     int width = 200;
     int height = 20;
 
-    public void createLogo() {
+    public void createASCIIMessage(String message) {
         BufferedImage logo = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics graphics = logo.getGraphics();
         graphics.setFont(new Font("SansSerif", Font.BOLD, 15));
 
         Graphics2D graphics2D = (Graphics2D) graphics;
         graphics2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-        graphics2D.drawString(Messages.WELCOME, 10, 20);
+        graphics2D.drawString(message, 10, 20);
 
         for (int y = 0; y < height; y++) {
             StringBuilder builder = new StringBuilder();
