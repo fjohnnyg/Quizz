@@ -23,6 +23,8 @@ public class Server {
     int numOfQuestions;
     int playersInput = 0;
     private int valideName = 0;
+    private int nrOfAnswers;
+    private boolean nextQuestion;
     public Server() {
         this.players = new CopyOnWriteArrayList<>();
         this.asTheme = false;
@@ -36,21 +38,17 @@ public class Server {
         int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
-        //while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
         while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
             acceptConnection(numberOfPlayers);
             ++numberOfPlayers;
         }
 
-        //checkIfGameCanStart();
+        checkIfGameCanStart();
 
         while(!checkIfGameCanStart()){
             checkIfGameCanStart();
-            System.out.println("cenas");
         }
 
-        //isGameStarted = true;
-        //System.out.println("começa o jogo!");
         startGame();
     }
 
@@ -75,15 +73,29 @@ public class Server {
 
     public boolean checkIfGameCanStart() {
         //return !players.get(0).getName().equals("PLAYER 0") && !players.get(1).getName().equals("PLAYER 1");
-        return valideName == MAX_NUM_OF_PLAYERS;
+        System.out.println(valideName);
+        return valideName == 2;
     }
 
+    /**
+     * the game begins after all players define their name
+     * choose the theme and send the questions to the players
+     */
     public synchronized void startGame() {
 
+        //isGameStarted = true;
         System.out.println("começou o jogo");
         themeChooser();
 
-        sendQuestionToPLayers();
+        while(numOfQuestions < 10){
+
+            sendQuestionToPlayers();
+            waitForAnswer();
+        }
+        isGameEnded = true;
+
+        //sendPlayersResults();
+        //gameOver();
 
         /*while (numOfQuestions < 10) {
             broadCast(sendQuestion());
@@ -112,13 +124,13 @@ public class Server {
         }*/
     }
 
-    public void sendQuestionToPLayers(){
+    public void sendQuestionToPlayers(){
         broadCast(sendQuestion());
         numOfQuestions++;
     }
 
-    public void waitForPlayersInput() {
-        while (playersInput != MAX_NUM_OF_PLAYERS) {
+    public synchronized void waitForAnswer() {
+        while (!nextQuestion) {
             try {
                 System.out.println("Waiting for both players!");
                 wait();
@@ -127,7 +139,10 @@ public class Server {
             }
         }
         notifyAll();
+        System.out.println("next question");
     }
+
+
     //private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
     private synchronized String getPlayerAnswer(PlayerHandler playerHandler){
         String answer;
@@ -143,12 +158,12 @@ public class Server {
         return answer;
     }
 
-    private synchronized String getMessageFromBuffer(PlayerHandler playerHandler){
+    private String getMessageFromBuffer(PlayerHandler playerHandler){
         String answer = playerHandler.getPlayerInput();
         return answer != null ? answer.toLowerCase() : null;
     }
 
-    private synchronized boolean validateAnswer(String playerAnswer, String regex) {
+    private boolean validateAnswer(String playerAnswer, String regex) {
         if(playerAnswer == null){ //occurs when suddenly a player closes client
             return false;
         }
@@ -158,18 +173,14 @@ public class Server {
         return playerAnswer.toLowerCase().matches(regex);
     }
 
-    private synchronized void dealWithAnswer(PlayerHandler playerHandler, String message) {
+    private void dealWithAnswer(PlayerHandler playerHandler, String message) {
         if (verifyAnswer(message))
             playerHandler.send("Your answer is correct!");
         if (!verifyAnswer(message))
             playerHandler.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
-
-        playersInput++;
-        //if (playersInput == MAX_NUM_OF_PLAYERS) playersInput = 0;
-        //System.out.println(playersInput);
     }
 
-    private synchronized boolean verifyAnswer(String message) {
+    private boolean verifyAnswer(String message) {
         String correctAnswer = questions.getCorrectAnswer();
         return correctAnswer.equalsIgnoreCase(message);
     }
@@ -249,14 +260,16 @@ public class Server {
     }
 
     public synchronized void playerWaits() {
-        while (valideName != 2) {
+        while (valideName < 2) {
             try {
+                System.out.println("Waiting for players valid names!");
                 wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         notifyAll();
+        System.out.println("players can star playing!");
     }
 
 
@@ -297,17 +310,23 @@ public class Server {
             send(String.format(Messages.WELCOME, name));
 
             playerWaits();
-            System.out.println("good to go!");
 
             //ASK PLAYER ANSWERS
 
             //if(isGameStarted){
                 //startGame();
-                while (numOfQuestions < 10){
+                while (!isGameEnded){
                     //startGame(players);
                     String playerAnswer = getPlayerAnswer(this);
                     dealWithAnswer(this, playerAnswer);
                     System.out.println("respondeu");
+                    nrOfAnswers++;
+
+                    System.out.println(nrOfAnswers);
+                    if(nrOfAnswers == 2){
+                        System.out.println("responderam os 2");
+                        nextQuestion = true;
+                    }
                 }
             //}
 

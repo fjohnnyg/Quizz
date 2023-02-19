@@ -34,10 +34,10 @@ public final class Messages {
     public static final String INVALID_ANSWER = "\u001B[31m" + "Invalid input." + "\u001B[0m" + "\nChoose answer A, B or C.";
     public static final String START_GAME = "LET'S START THIS GAME!";
     public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
-    public static final String ART = "The theme you'll play is: ART";
-    public static final String SPORTS = "The theme you'll play is: SPORTS";
-    public static final String GEOGRAPHY = "The theme you'll play is: GEOGRAPHY";
-    public static final String ALL_THEMES = "You'll be playing ALL THEMES";
+    public static final String ART = "The theme you'll play is: ART\n";
+    public static final String SPORTS = "The theme you'll play is: SPORTS\n";
+    public static final String GEOGRAPHY = "The theme you'll play is: GEOGRAPHY\n";
+    public static final String ALL_THEMES = "You'll be playing ALL THEMES\n";
     public static final String CHOOSE_ANSWER = "Choose the answer A, B or C.";
 
 
