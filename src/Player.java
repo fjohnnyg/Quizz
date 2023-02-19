@@ -18,7 +18,7 @@ public class Player {
 
     private void start(String host, int port) throws IOException {
         Drawing welcomeScreen = new Drawing();
-        welcomeScreen.createASCIIMessage(Messages.WELCOME);
+        welcomeScreen.createASCIIMessage(Messages.ASCII_WELCOME, "\u001B[34m");
         Socket socket = new Socket(host, port);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));

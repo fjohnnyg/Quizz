@@ -1,5 +1,6 @@
 package server;
 
+import server.drawing.Drawing;
 import server.messages.Messages;
 
 import java.io.*;
@@ -49,7 +50,6 @@ public class Server {
                 e.printStackTrace();
             }
         }
-        System.out.println("Waiting players");
     }
 
     public void acceptConnection() throws IOException {
@@ -61,6 +61,7 @@ public class Server {
 
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
+        playerHandler.send(Messages.GAME_INSTRUCTIONS);
         broadcast(playerHandler.getName(), Messages.PLAYER_ENTERED_GAME);
     }
 
@@ -88,24 +89,26 @@ public class Server {
                 option[i] = getPlayerAnswer(
                         players.get(i),
                         optionsRegex,
-                        players.get(i).getName() + "Please choose a, b or c"
-                );
+                        players.get(i).getName() + Messages.CHOOSE_ANSWER);
             }
             p1Answer = option[0];
             p2Answer = option[1];
             dealWithAnswer(p1Answer, p2Answer);
             numOfQuestions++;
         }
+
+        gamePlayersResults();
+        endGame();
     }
 
     public void themeChooser() {
         int rand = (int) (Math.random() * (4 - 1) +1);
         try {
             switch (rand) {
-                case 1 -> questions.createListOfQuestion("SPORTS");
-                case 2 -> questions.createListOfQuestion("GEOGRAPHY");
-                case 3 -> questions.createListOfQuestion("ART");
-                case 4 -> questions.createListOfQuestion("ALL THEMES");
+                case 1 -> {questions.createListOfQuestion("SPORTS"); broadCast(Messages.SPORTS);}
+                case 2 -> {questions.createListOfQuestion("GEOGRAPHY");broadCast(Messages.GEOGRAPHY);}
+                case 3 -> {questions.createListOfQuestion("ART");broadCast(Messages.ART);}
+                case 4 -> {questions.createListOfQuestion("ALL THEMES");broadCast(Messages.ALL_THEMES);}
                 default -> throw new IllegalStateException();
             }
         } catch (IOException e) {
@@ -139,14 +142,20 @@ public class Server {
     }
 
     private void dealWithAnswer(String p1Answer, String p2Answer) {
-        if (verifyAnswer(p1Answer))
-            players.get(0).send("Your answer is correct!");
-        if (!verifyAnswer(p1Answer))
-            players.get(0).send("Wrong answer. Correct answer is " + questions.getCorrectAnswerValue());
-        if (verifyAnswer(p2Answer))
-            players.get(1).send("Your answer is correct!");
+        if (verifyAnswer(p1Answer)) {
+            players.get(0).setScore();
+            players.get(0).send(Messages.RIGHT_ANSWER + players.get(0).getScore());
+        }
+        if (!verifyAnswer(p1Answer)) {
+            players.get(0).send(Messages.WRONG_ANSWER + questions.getCorrectAnswerValue());
+        }
+        if (verifyAnswer(p2Answer)) {
+            players.get(1).setScore();
+            players.get(1).send(Messages.RIGHT_ANSWER
+                    + players.get(1).getScore());
+        }
         if (!verifyAnswer(p2Answer))
-            players.get(1).send("Wrong answer. Correct answer is " + questions.getCorrectAnswerValue());
+            players.get(1).send(Messages.WRONG_ANSWER + questions.getCorrectAnswerValue());
     }
 
     private boolean verifyAnswer(String answer) {
@@ -154,9 +163,31 @@ public class Server {
         return correctAnswer.equalsIgnoreCase(answer);
     }
 
-
     public String sendQuestion() {
-        return questions.getQuestion();
+        return numOfQuestions + ". " + questions.getQuestion();
+    }
+
+    public String checkWinner(){
+        String playerName = "";
+
+        if(players.get(0).getScore() < players.get(1).getScore()){
+            playerName = players.get(1).getName();
+        } else if (players.get(1).getScore() < players.get(0).getScore()){
+            playerName = players.get(0).getName();
+        } else {
+            playerName = "It's a draw!";
+        }
+
+        return playerName;
+    }
+    public void gamePlayersResults(){
+
+        for (PlayerHandler player: players) {
+            broadCast(player.getName() + Messages.FINAL_SCORE + player.getScore());
+
+        }
+
+        broadCast(checkWinner() + "\n" + Messages.WINNER);
     }
 
     public void broadCast(String message) {
@@ -182,23 +213,10 @@ public class Server {
     }
 
     public void endGame() {
-        broadCast(Messages.GAME_OVER);
         players.stream()
                 .filter(p -> !p.hasLeft)
                 .forEach(PlayerHandler::quit);
         isGameEnded = true;
-    }
-
-    public boolean isAsTheme() {
-        return asTheme;
-    }
-
-    public boolean isGameEnded() {
-        return isGameEnded;
-    }
-
-    public Question getQuestions() {
-        return questions;
     }
 
 
@@ -209,6 +227,7 @@ public class Server {
         private BufferedWriter out;
         private boolean hasLeft;
         private BufferedReader in;
+        private int score = 0;
 
         public PlayerHandler(Socket playerSocket) {
             this.playerSocket = playerSocket;
@@ -240,7 +259,7 @@ public class Server {
 
             String input = getInput();
             while (!input.matches("[a-zA-Z]+")) {
-                send(Messages.ASK_NAME);
+                send(Messages.INVALID_NAME);
                 input = getInput();
             }
             name = input;
@@ -301,6 +320,14 @@ public class Server {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public void setScore() {
+            this.score++;
+        }
+
+        public int getScore() {
+            return this.score;
         }
     }
 }

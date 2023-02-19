@@ -11,16 +11,10 @@
 ### Project description:
 
 
->- More than 2 players can play the game.
->
-> 
->- A player chooses the topic (GEOGRAPHY, SPORTS, ART, GENERAL).
+>- 2 players can play the game.
 >
 > 
 >- A question is presented randomly by the topic. 
->
-> 
->- If the player chooses the topic GENERAL, the question is chosen randomly from all previous topics.
 >
 > 
 >- After the question is presented, the player receives 3 options of answers. He/she has to press the key (A, B or C) choosing which answer is correct.
@@ -32,7 +26,7 @@
 >- A player receives a point when he/she answers correctly.
 >
 > 
->- The game is over than all the questions are asked from the quiz.
+>- The game is over when 10 questions are asked from the quiz.
 >
 >
 >- The winner is announced - the player who answered the most questions correctly.
@@ -41,10 +35,10 @@
 ### Instructions to run:
 
 
->- Compile the [Server ??????] file and run it.
+>- Compile the ServerLauncher file and run it.
 >
 > 
->- Compile the [Player ??????] file and run it more than 2 times.
+>- Compile the PLayer file 2 times.
 >
 >
 >- Enjoy the game!

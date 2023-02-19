@@ -9,20 +9,15 @@ public final class Messages {
     public static final String NO_SUCH_COMMAND = "⚠️" + "\u001B[31m" + "Invalid command!" + "\u001B[0m";
     public static final String GAME_INSTRUCTIONS = """
            You will play against another player.
-           You'll get to choose the theme of your questions:
+           You'll get questions of one of these themes:
            SPORTS - ART - GEOGRAPHY - ALL THEMES
            This quiz has 10 questions.
            Choose the right answer pressing the key A, B or C.
            For the right answer you'll get 1 point. The winner is who has the most points in the end of the game.
            Good luck :)
            """;
-    public static final String CLIENT_DISCONNECTED = " left the chat.";
-    public static final String WHISPER_INSTRUCTIONS = "Invalid whisper use. Correct use: '/whisper <username> <message>";
-    public static final String NO_SUCH_CLIENT = "The client you want to whisper to doesn't exists.";
-    public static final String WHISPER = "(whisper)";
     public static final String WELCOME = "Welcome to Quizz! %s";
-    public static final String CLIENT_ERROR = "Something went wrong with this client's connection. Error: ";
-    public static final String CLIENT_ALREADY_EXISTS = "A client with this name already exists. Please choose another one.";
+    public static final String ASCII_WELCOME = "Welcome to Quizz!";
 
     public static final String SELF_NAME_CHANGED = "You changed your name to: %s";
     public static final String NAME_CHANGED = "%s changed name to: %s";
@@ -44,9 +39,18 @@ public final class Messages {
 
     //MESSAGES DURING THE GAME
 
-    public static final String WRONG_ANSWER = "\u001B[31m" + "WRONG. " + "\u001B[0m" + "The right answer is: X";
-    public static final String RIGHT_ANSWER = "\u001B[32m" + "RIGHT. " + "\u001B[0m" + "You won 1 point for this question!";
+    public static final String WRONG_ANSWER = "\u001B[31m" + "WRONG. " + "\u001B[0m" + "The right answer is: ";
+    public static final String RIGHT_ANSWER = "\u001B[32m" + "RIGHT ANSWER." + "\u001B[0m" + "\nYour score is:  ";
     public static final String WARNING = "If you leave a game now you'll loose all your points!";
+    public static final String FINAL_SCORE = " final score is: ";
+    public static final String WINNER = "\\u001B[33m" + "'##:::::'##:'####:'##::: ##:'##::: ##:'########:'########::'####:\n" +
+            " ##:'##: ##:. ##:: ###:: ##: ###:: ##: ##.....:: ##.... ##: ####:\n" +
+            " ##: ##: ##:: ##:: ####: ##: ####: ##: ##::::::: ##:::: ##: ####:\n" +
+            " ##: ##: ##:: ##:: ## ## ##: ## ## ##: ######::: ########::: ##::\n" +
+            " ##: ##: ##:: ##:: ##. ####: ##. ####: ##...:::: ##.. ##::::..:::\n" +
+            " ##: ##: ##:: ##:: ##:. ###: ##:. ###: ##::::::: ##::. ##::'####:\n" +
+            ". ###. ###::'####: ##::. ##: ##::. ##: ########: ##:::. ##: ####:\n" +
+            ":...::...:::....::..::::..::..::::..::........::..:::::..::....::" + "\u001B[0m";
     public static final String GAME_OVER = "\u001B[31m" + ":'######::::::'###::::'##::::'##:'########:::::'#######::'##::::'##:'########:'########::\n" +
             "'##... ##::::'## ##::: ###::'###: ##.....:::::'##.... ##: ##:::: ##: ##.....:: ##.... ##:\n" +
             " ##:::..::::'##:. ##:: ####'####: ##:::::::::: ##:::: ##: ##:::: ##: ##::::::: ##:::: ##:\n" +
