@@ -29,4 +29,7 @@ public final class Messages {
     public static final String NO_MESSAGE_YET = "Define a message for this, please";
 
 
+
+    public static final String INVALID_ANSWER = "Invalid answer. Must choose A, B or C.\n";
+
 }

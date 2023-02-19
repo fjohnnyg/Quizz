@@ -1,7 +1,6 @@
 package server.commands;
 
 import server.Server;
-import server.Question;
 import server.messages.Messages;
 
 public class startHandler implements CommandHandler {
@@ -22,7 +21,7 @@ public class startHandler implements CommandHandler {
     }
 
     private String getMessageFromBuffer(){
-        String answer=playerHandler.getAnswer();
+        String answer=playerHandler.getPlayerInput();
         return answer!=null? answer.toLowerCase(): null;
     }
 

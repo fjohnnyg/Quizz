@@ -1,6 +1,5 @@
 package server;
 
-import server.commands.Command;
 import server.messages.Messages;
 
 import java.io.*;
@@ -12,7 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 
-public class Server implements Runnable {
+public class Server {
     private static final int MAX_NUM_OF_PLAYERS = 2;
     private ServerSocket serverSocket;
     private ExecutorService service;
@@ -22,6 +21,7 @@ public class Server implements Runnable {
     private boolean isGameStarted;
     private boolean isGameEnded;
     int numOfQuestions;
+    int playersInput = 0;
     public Server() {
         this.players = new CopyOnWriteArrayList<>();
         this.asTheme = false;
@@ -35,19 +35,17 @@ public class Server implements Runnable {
         int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
-        while (numberOfPlayers <= MAX_NUM_OF_PLAYERS) {
+        while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
             acceptConnection(numberOfPlayers);
             numberOfPlayers++;
         }
-    }
-    @Override
-    public void run() {
-        while (!isGameEnded) {
-            if (checkIfGameCanStart() && !isGameStarted) {
-                startGame();
-            }
-            System.out.println("Not");
+
+        checkIfGameCanStart();
+
+        while(!checkIfGameCanStart()){
+            checkIfGameCanStart();
         }
+        startGame(players);
     }
 
     public void acceptConnection(int numberOfConnections) throws IOException {
@@ -59,30 +57,104 @@ public class Server implements Runnable {
     }
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
-        Thread playerThread = new Thread(playerHandler);
-        playerThread.start();
         //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
         playerHandler.send(Messages.COMMANDS_LIST);
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
 
     public boolean isAcceptingPlayers() {
-        return players.size() <= MAX_NUM_OF_PLAYERS && !isGameStarted;
+        return players.size() < MAX_NUM_OF_PLAYERS && !isGameStarted;
     }
 
     public boolean checkIfGameCanStart() {
-        return  !isAcceptingPlayers()/* &&
-                players.stream().filter(p -> !p.hasLeft)
-                .noneMatch(playerHandler -> playerHandler.getName() == "")*/;
+        return !players.get(0).getName().equals("CLIENT-0") && !players.get(1).getName().equals("CLIENT-1");
     }
 
-    public void startGame() {
-        //todo
+    public synchronized void startGame(List<PlayerHandler> players) {
+
         themeChooser();
+
         while (numOfQuestions < 10) {
             broadCast(sendQuestion());
+
+            //WAIT FOR PLAYERS VALID ANSWERS
+            //waitForPlayersInput();
+
+            while (playersInput != MAX_NUM_OF_PLAYERS) {
+
+                for (PlayerHandler player : players) {
+                    String playerAnswer = getPlayerAnswer(player);
+                    dealWithAnswer(player, playerAnswer);
+                }
+            }
+            playersInput = 0;
+
+            System.out.println("saiu");
+
+            //WHEN BOTH HAVE PLAYED VERIFY ANSWERS
+
             numOfQuestions++;
         }
+
+        //todo
+        //VERIFY SCORES
+        //PRINT GAME OVER
+    }
+
+    public synchronized void waitForPlayersInput() {
+        while (playersInput != MAX_NUM_OF_PLAYERS) {
+            try {
+                System.out.println("Waiting for both players!");
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        notifyAll();
+    }
+    //private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
+    private synchronized String getPlayerAnswer(PlayerHandler playerHandler){
+        String answer;
+        String optionsRegex = "[abc]";
+        answer = getMessageFromBuffer(playerHandler);
+        while (!validateAnswer(answer, optionsRegex) && answer != null) {
+            //playerHandler.send(playerHandler.getName() + Messages.INVALID_ANSWER);
+            playerHandler.send(Messages.INVALID_ANSWER);
+            answer = getMessageFromBuffer(playerHandler);
+        }
+
+        return answer;
+    }
+
+    private synchronized String getMessageFromBuffer(PlayerHandler playerHandler){
+        String answer = playerHandler.getPlayerInput();
+        return answer != null ? answer.toLowerCase() : null;
+    }
+
+    private synchronized boolean validateAnswer(String playerAnswer, String regex) {
+        if(playerAnswer == null){ //occurs when suddenly a player closes client
+            return false;
+        }
+        if (playerAnswer.length() != 1) {
+            return false;
+        }
+        return playerAnswer.toLowerCase().matches(regex);
+    }
+
+    private synchronized void dealWithAnswer(PlayerHandler playerHandler, String message) {
+        if (verifyAnswer(message))
+            playerHandler.send("Your answer is correct!");
+        if (!verifyAnswer(message))
+            playerHandler.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
+
+        playersInput++;
+        //if (playersInput == MAX_NUM_OF_PLAYERS) playersInput = 0;
+        //System.out.println(playersInput);
+    }
+
+    private synchronized boolean verifyAnswer(String message) {
+        String correctAnswer = questions.getCorrectAnswer();
+        return correctAnswer.equalsIgnoreCase(message);
     }
 
     public void themeChooser() {
@@ -105,13 +177,13 @@ public class Server implements Runnable {
     }
 
 
-    public void broadCast(String message) {
+    public synchronized void broadCast(String message) {
         players.stream()
                 .filter(p -> !p.hasLeft)
                 .forEach(player -> player.send(message));
     }
 
-    public void broadcast(String name, String message) {
+    public synchronized void broadcast(String name, String message) {
         players.stream()
                 .filter(handler -> !handler.getName().equals(name))
                 .forEach(handler -> handler.send(name + ": " + message));
@@ -183,19 +255,36 @@ public class Server implements Runnable {
         @Override
         public void run() {
             addPlayer(this);
+
+            //ASK PLAYER TO INPUT A NAME
             send(Messages.ASK_NAME);
-            name = getAnswer();
+            name = getPlayerInput();
             while (!name.matches("[a-zA-Z]+")){
                 send(Messages.INVALID_NAME);
-                name = getAnswer();
+                name = getPlayerInput();
+            }
+
+            send(String.format(Messages.WELCOME, name));
+
+            //runGame();
+
+            while (!isGameEnded) {
+                if (Thread.interrupted()) {
+                    return;
+                }
             }
             quit();
         }
 
-        public String getAnswer() {
+        /**
+         * method use to read what the players input in terminal
+         * @return
+         */
+
+        public String getPlayerInput() {
             String message = null;
             try {
-                message = in.readLine();
+                message = this.in.readLine();
             } catch (IOException | NullPointerException e) {
                 quit();
             } finally {

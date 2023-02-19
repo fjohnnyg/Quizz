@@ -74,7 +74,7 @@ public class Question {
                     }
                     line = readerQuestionTxt.readLine();
                     this.questionList.add(new ArrayList(temp));
-                    System.out.println(temp);
+                    //System.out.println(temp);
                     temp.clear();
                 }
                 break;
@@ -176,8 +176,8 @@ public class Question {
 
             Collections.shuffle(questionList.get(i).subList(1, 4));
         }
-        System.out.println(questionList);
-        System.out.println(correctAnswersList.toString());
+        //System.out.println(questionList);
+        //System.out.println(correctAnswersList.toString());
     }
 
     /**

@@ -9,7 +9,7 @@ public class Player {
         Drawing welcome = new Drawing();
         welcome.createLogo();
         try {
-            player.start("localhost", 8082);
+            player.start("localhost", 8081);
         } catch (IOException e) {
             System.out.println("Connection closed...");
         }
