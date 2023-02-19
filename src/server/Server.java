@@ -20,14 +20,12 @@ public class Server {
     private static boolean isGameStarted;
     private boolean isGameEnded;
     private int numOfQuestions;
-    private final String VALID_ANSWER_REGEX = "[abc]";
-    private List<String> numberOfQuestionsToAdvance;
+
     public Server() {
         this.players = new ArrayList<>();
         this.asTheme = false;
         this.isGameEnded = false;
         this.questions = new Question();
-        this.numberOfQuestionsToAdvance = new ArrayList<>();
     }
 
     public void start(int port) throws IOException {
@@ -44,8 +42,6 @@ public class Server {
 
     public void runGame() {
 
-        while (!isGameEnded) {
-
             if (checkIfGameCanStart() && !isGameStarted) {
                 try {
                     startGame();
@@ -54,9 +50,6 @@ public class Server {
                 }
             }
             System.out.println("Waiting players");
-            break;
-        }
-        System.out.println("Fim");
     }
 
     public void acceptConnection() throws IOException {
@@ -65,10 +58,9 @@ public class Server {
                 new PlayerHandler(clientSocket);
         service.submit(playerHandler);
     }
+
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
-        //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
-        playerHandler.send(Messages.COMMANDS_LIST);
         broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
     }
 
@@ -86,7 +78,7 @@ public class Server {
     public void startGame() throws InterruptedException {
         isGameStarted = true;
         themeChooser();
-        /*String p1Answer;
+        String p1Answer;
         String p2Answer;
         String[] option = new String[MAX_NUM_OF_PLAYERS];
         while (numOfQuestions < 10) {
@@ -103,48 +95,7 @@ public class Server {
             p2Answer = option[1];
             dealWithAnswer(p1Answer, p2Answer);
             numOfQuestions++;
-        }*/
-    }
-
-/*    private String getMessageFromBuffer(PlayerHandler playerHandler){
-        String answer = playerHandler.getInput();
-        return answer!=null? answer.toLowerCase(): null;
-    }*/
-
-/*    private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
-        String answer;
-        answer = getMessageFromBuffer(playerHandler);
-        while (!validateAnswer(answer, regex)  &&  answer!=null) {
-            playerHandler.send(playerHandler.getName() + invalidMessage);
-            answer = getMessageFromBuffer(playerHandler);
         }
-        return answer;
-    }*/
-
-    private boolean checkIfReadyForNextQuestion() {
-        return numberOfQuestionsToAdvance.size() == MAX_NUM_OF_PLAYERS;
-    }
-
-    private boolean validateAnswer(String playerAnswer, String regex) {
-        if(playerAnswer==null){ //occurs when suddenly a player closes client
-            return false;
-        }
-        if (playerAnswer.length() != 1) {
-            return false;
-        }
-        return playerAnswer.toLowerCase().matches(regex);
-    }
-
-    private boolean verifyAnswer(String answer) {
-        String correctAnswer = questions.getCorrectAnswer();
-        return correctAnswer.equalsIgnoreCase(answer);
-    }
-
-    private void dealWithAnswer(PlayerHandler playerHandler, String answer) {
-        if (verifyAnswer(answer))
-            playerHandler.send("Your answer is correct!");
-        if (!verifyAnswer(answer))
-            playerHandler.send("Wrong answer. Correct answer is " + questions.getCorrectAnswerValue());
     }
 
     public void themeChooser() {
@@ -162,10 +113,51 @@ public class Server {
         }
     }
 
+    private String getAnswerFromBuffer(PlayerHandler playerHandler){
+        String answer = playerHandler.getInput();
+        return answer!=null? answer.toLowerCase(): null;
+    }
+
+    private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
+        String answer;
+        answer = getAnswerFromBuffer(playerHandler);
+        while (!validateAnswer(answer, regex)  &&  answer!=null) {
+            playerHandler.send(playerHandler.getName() + invalidMessage);
+            answer = getAnswerFromBuffer(playerHandler);
+        }
+        return answer;
+    }
+
+    private boolean validateAnswer(String playerAnswer, String regex) {
+        if(playerAnswer==null){ //occurs when suddenly a player closes client
+            return false;
+        }
+        if (playerAnswer.length() != 1) {
+            return false;
+        }
+        return playerAnswer.toLowerCase().matches(regex);
+    }
+
+    private void dealWithAnswer(String p1Answer, String p2Answer) {
+        if (verifyAnswer(p1Answer))
+            players.get(0).send("Your answer is correct!");
+        if (!verifyAnswer(p1Answer))
+            players.get(0).send("Wrong answer. Correct answer is " + questions.getCorrectAnswerValue());
+        if (verifyAnswer(p2Answer))
+            players.get(1).send("Your answer is correct!");
+        if (!verifyAnswer(p2Answer))
+            players.get(1).send("Wrong answer. Correct answer is " + questions.getCorrectAnswerValue());
+    }
+
+    private boolean verifyAnswer(String answer) {
+        String correctAnswer = questions.getCorrectAnswer();
+        return correctAnswer.equalsIgnoreCase(answer);
+    }
+
+
     public String sendQuestion() {
         return questions.getQuestion();
     }
-
 
     public void broadCast(String message) {
         players.stream()
@@ -179,20 +171,8 @@ public class Server {
                 .forEach(handler -> handler.send(name + ": " + message));
     }
 
-    public String listPlayers() {
-        StringBuffer buffer = new StringBuffer();
-        players.forEach(player -> buffer.append(player.getName()).append("\n"));
-        return buffer.toString();
-    }
-
     public void removePlayer(PlayerHandler playerHandler) {
         players.remove(playerHandler);
-    }
-
-    public Optional<PlayerHandler> getPlayerByName(String name) {
-        return players.stream()
-                .filter(playerHandler -> playerHandler.getName().equals(name))
-                .findFirst();
     }
 
     public void areStillPlayersPlaying() {
@@ -227,24 +207,21 @@ public class Server {
         private String name = "";
         private Socket playerSocket;
         private BufferedWriter out;
-        private String message;
         private boolean hasLeft;
         private BufferedReader in;
-        private String answer;
 
         public PlayerHandler(Socket playerSocket) {
             this.playerSocket = playerSocket;
-        }
-
-        @Override
-        public void run() {
-
             try {
                 this.out = new BufferedWriter(new OutputStreamWriter(playerSocket.getOutputStream()));
                 this.in = new BufferedReader(new InputStreamReader(playerSocket.getInputStream()));
             } catch (IOException e) {
                 quit();
             }
+        }
+
+        @Override
+        public void run() {
 
             addPlayer(this);
 
@@ -270,19 +247,6 @@ public class Server {
 
             send(String.format(Messages.WELCOME, name));
             runGame();
-                while (numOfQuestions < 10) {
-                    if (isGameStarted) {
-                        broadCast(sendQuestion());
-                        String optionInput = getInput();
-                        while (!validateAnswer(optionInput, VALID_ANSWER_REGEX) && optionInput != null) {
-                            this.send(this.getName() + "Please choose a, b or c.");
-                            optionInput = getInput();
-                        }
-                        answer = optionInput;
-                        dealWithAnswer(this, answer);
-                        numOfQuestions++;
-                    }
-                }
             while (!isGameEnded) {
                 if (Thread.interrupted()) {
                     return;
@@ -307,49 +271,6 @@ public class Server {
                     return message;
                 }
         }
-/*
-        private boolean isTheme(String message) {
-            return message.equals("1") ||
-                    message.equals("2") ||
-                    message.equals("3");
-        }
-
-        private void dealWithTheme(String message) {
-            themeChooser(message);
-            this.send(sendQuestion());
-        }
-
-        private boolean isAnswer(String message) {
-            return (message.equalsIgnoreCase("a") ||
-                    message.equalsIgnoreCase("b") ||
-                    message.equalsIgnoreCase("c") ||
-                    message.equalsIgnoreCase("d"));
-        }
-
-        private void dealWithAnswer(String message) {
-            if (verifyAnswer(message))
-                this.send("Your answer is correct!");
-            if (!verifyAnswer(message))
-                this.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
-        }
-
-        private boolean isCommand(String message) {
-            return message.startsWith("/");
-        }
-
-        private void dealWithCommand(String message) throws IOException {
-            String description = message.split(" ")[0];
-            Command command = Command.getCommandFromDescription(description);
-
-            if (command == null) {
-                out.write(Messages.NO_SUCH_COMMAND);
-                out.newLine();
-                out.flush();
-                return;
-            }
-
-            command.getHandler().execute(Server.this, this);
-        }*/
 
         public void send(String message) {
             try {
@@ -380,10 +301,6 @@ public class Server {
 
         public void setName(String name) {
             this.name = name;
-        }
-
-        public String getMessage() {
-            return message;
         }
     }
 
