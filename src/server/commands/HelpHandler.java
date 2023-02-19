@@ -6,6 +6,6 @@ import server.messages.Messages;
 public class HelpHandler implements CommandHandler {
     @Override
     public void execute(Server server, Server.PlayerHandler playerHandler) {
-        playerHandler.send(Messages.COMMANDS_LIST);
+        playerHandler.send(Messages.GAME_INSTRUCTIONS);
     }
 }

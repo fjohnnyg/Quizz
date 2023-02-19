@@ -22,6 +22,7 @@ public class Server {
     private boolean isGameEnded;
     int numOfQuestions;
     int playersInput = 0;
+    private int valideName = 0;
     public Server() {
         this.players = new CopyOnWriteArrayList<>();
         this.asTheme = false;
@@ -35,17 +36,22 @@ public class Server {
         int numberOfPlayers = 0;
         System.out.printf(Messages.SERVER_STARTED, port);
 
+        //while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
         while (numberOfPlayers < MAX_NUM_OF_PLAYERS) {
             acceptConnection(numberOfPlayers);
-            numberOfPlayers++;
+            ++numberOfPlayers;
         }
 
-        checkIfGameCanStart();
+        //checkIfGameCanStart();
 
         while(!checkIfGameCanStart()){
             checkIfGameCanStart();
+            System.out.println("cenas");
         }
-        startGame(players);
+
+        //isGameStarted = true;
+        //System.out.println("começa o jogo!");
+        startGame();
     }
 
     public void acceptConnection(int numberOfConnections) throws IOException {
@@ -54,12 +60,13 @@ public class Server {
                 new PlayerHandler(clientSocket,
                         Messages.DEFAULT_NAME + numberOfConnections);
         service.submit(playerHandler);
+        addPlayer(playerHandler);
     }
     private void addPlayer(PlayerHandler playerHandler) {
         players.add(playerHandler);
         //playerHandler.send(Messages.WELCOME.formatted(playerHandler.getName()));
-        playerHandler.send(Messages.COMMANDS_LIST);
-        broadcast(playerHandler.getName(), Messages.CLIENT_ENTERED_CHAT);
+        playerHandler.send(Messages.GAME_INSTRUCTIONS);
+        broadcast(playerHandler.getName(), Messages.PLAYER_ENTERED_GAME);
     }
 
     public boolean isAcceptingPlayers() {
@@ -67,14 +74,18 @@ public class Server {
     }
 
     public boolean checkIfGameCanStart() {
-        return !players.get(0).getName().equals("CLIENT-0") && !players.get(1).getName().equals("CLIENT-1");
+        //return !players.get(0).getName().equals("PLAYER 0") && !players.get(1).getName().equals("PLAYER 1");
+        return valideName == MAX_NUM_OF_PLAYERS;
     }
 
-    public synchronized void startGame(List<PlayerHandler> players) {
+    public synchronized void startGame() {
 
+        System.out.println("começou o jogo");
         themeChooser();
 
-        while (numOfQuestions < 10) {
+        sendQuestionToPLayers();
+
+        /*while (numOfQuestions < 10) {
             broadCast(sendQuestion());
 
             //WAIT FOR PLAYERS VALID ANSWERS
@@ -82,10 +93,14 @@ public class Server {
 
             while (playersInput != MAX_NUM_OF_PLAYERS) {
 
-                for (PlayerHandler player : players) {
-                    String playerAnswer = getPlayerAnswer(player);
-                    dealWithAnswer(player, playerAnswer);
+                synchronized (this){
+                    for (PlayerHandler player : players) {
+                        String playerAnswer = getPlayerAnswer(player);
+                        dealWithAnswer(player, playerAnswer);
+                    }
                 }
+
+
             }
             playersInput = 0;
 
@@ -94,14 +109,15 @@ public class Server {
             //WHEN BOTH HAVE PLAYED VERIFY ANSWERS
 
             numOfQuestions++;
-        }
-
-        //todo
-        //VERIFY SCORES
-        //PRINT GAME OVER
+        }*/
     }
 
-    public synchronized void waitForPlayersInput() {
+    public void sendQuestionToPLayers(){
+        broadCast(sendQuestion());
+        numOfQuestions++;
+    }
+
+    public void waitForPlayersInput() {
         while (playersInput != MAX_NUM_OF_PLAYERS) {
             try {
                 System.out.println("Waiting for both players!");
@@ -116,11 +132,12 @@ public class Server {
     private synchronized String getPlayerAnswer(PlayerHandler playerHandler){
         String answer;
         String optionsRegex = "[abc]";
-        answer = getMessageFromBuffer(playerHandler);
+        answer = playerHandler.getPlayerInput();
+        //answer = getMessageFromBuffer(playerHandler);
         while (!validateAnswer(answer, optionsRegex) && answer != null) {
             //playerHandler.send(playerHandler.getName() + Messages.INVALID_ANSWER);
             playerHandler.send(Messages.INVALID_ANSWER);
-            answer = getMessageFromBuffer(playerHandler);
+            answer = playerHandler.getPlayerInput();
         }
 
         return answer;
@@ -161,10 +178,10 @@ public class Server {
         int rand = (int) (Math.random() * (4 - 1) +1);
         try {
             switch (rand) {
-                case 1 -> questions.createListOfQuestion("SPORTS");
-                case 2 -> questions.createListOfQuestion("GEOGRAPHY");
-                case 3 -> questions.createListOfQuestion("ART");
-                case 4 -> questions.createListOfQuestion("ALL THEMES");
+                case 1 -> {questions.createListOfQuestion("SPORTS"); broadCast(Messages.SPORTS);}
+                case 2 -> {questions.createListOfQuestion("GEOGRAPHY");broadCast(Messages.GEOGRAPHY);}
+                case 3 -> {questions.createListOfQuestion("ART"); broadCast(Messages.ART);}
+                case 4 -> {questions.createListOfQuestion("ALL THEMES"); broadCast(Messages.ALL_THEMES);}
                 default -> throw new IllegalStateException();
             }
         } catch (IOException e) {
@@ -212,7 +229,7 @@ public class Server {
     }
 
     public void endGame() {
-        broadCast(Messages.NO_MESSAGE_YET);
+        broadCast(Messages.GAME_OVER);
         players.stream()
                 .filter(p -> !p.hasLeft)
                 .forEach(PlayerHandler::quit);
@@ -229,6 +246,17 @@ public class Server {
 
     public Question getQuestions() {
         return questions;
+    }
+
+    public synchronized void playerWaits() {
+        while (valideName != 2) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        notifyAll();
     }
 
 
@@ -254,7 +282,9 @@ public class Server {
 
         @Override
         public void run() {
-            addPlayer(this);
+
+            System.out.println("criou jogador");
+            //addPlayer(this);
 
             //ASK PLAYER TO INPUT A NAME
             send(Messages.ASK_NAME);
@@ -263,8 +293,23 @@ public class Server {
                 send(Messages.INVALID_NAME);
                 name = getPlayerInput();
             }
-
+            valideName++;
             send(String.format(Messages.WELCOME, name));
+
+            playerWaits();
+            System.out.println("good to go!");
+
+            //ASK PLAYER ANSWERS
+
+            //if(isGameStarted){
+                //startGame();
+                while (numOfQuestions < 10){
+                    //startGame(players);
+                    String playerAnswer = getPlayerAnswer(this);
+                    dealWithAnswer(this, playerAnswer);
+                    System.out.println("respondeu");
+                }
+            //}
 
             //runGame();
 
@@ -357,7 +402,7 @@ public class Server {
                 System.out.println("Couldn't closer player socket");
             } finally {
                 areStillPlayersPlaying();
-                broadCast(Messages.NO_MESSAGE_YET);//Player x left the game
+                broadCast(Messages.PLAYER_LEFT_GAME);//Player x left the game
             }
         }
 
