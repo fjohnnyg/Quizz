@@ -57,7 +57,13 @@ public class Server {
             break;
         }
         System.out.println("Fim");
+
     }
+//    @Override
+//    public void run() {
+//
+//            System.out.println("Not");
+//        }
 
     public void acceptConnection() throws IOException {
         Socket clientSocket = serverSocket.accept();
@@ -209,8 +215,8 @@ public class Server {
         isGameEnded = true;
     }
 
-    public boolean isAsTheme() {
-        return asTheme;
+    public boolean isHasTheme() {
+        return hasTheme;
     }
 
     public boolean isGameEnded() {
@@ -288,6 +294,14 @@ public class Server {
                     return;
                 }
             }
+
+            broadCast(String.format(Messages.WELCOME, name));
+            send("Waiting players");
+            while (!isGameEnded) {
+                if (Thread.interrupted()) {
+                    return;
+                }
+            }
             quit();
 
         }
@@ -313,41 +327,34 @@ public class Server {
                     message.equals("2") ||
                     message.equals("3");
         }
-
         private void dealWithTheme(String message) {
             themeChooser(message);
             this.send(sendQuestion());
         }
-
         private boolean isAnswer(String message) {
             return (message.equalsIgnoreCase("a") ||
                     message.equalsIgnoreCase("b") ||
                     message.equalsIgnoreCase("c") ||
                     message.equalsIgnoreCase("d"));
         }
-
         private void dealWithAnswer(String message) {
             if (verifyAnswer(message))
                 this.send("Your answer is correct!");
             if (!verifyAnswer(message))
                 this.send("Wrong answer. Correct answer is " + questions.getCorrectAnswer());
         }
-
         private boolean isCommand(String message) {
             return message.startsWith("/");
         }
-
         private void dealWithCommand(String message) throws IOException {
             String description = message.split(" ")[0];
             Command command = Command.getCommandFromDescription(description);
-
             if (command == null) {
                 out.write(Messages.NO_SUCH_COMMAND);
                 out.newLine();
                 out.flush();
                 return;
             }
-
             command.getHandler().execute(Server.this, this);
         }*/
 

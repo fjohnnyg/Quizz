@@ -13,7 +13,7 @@ public class startHandler implements CommandHandler {
         String optionsRegex = "[abcd]";
         String message = Messages.THEME_CHOOSER;
         String option;
-        if (server.isAsTheme()) {
+        if (server.isHasTheme()) {
             optionsRegex = "[abc]";
         }
         server.broadCast(server.sendQuestion());
