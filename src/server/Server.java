@@ -27,15 +27,6 @@ public class Server {
         this.questions = new Question();
     }
 
-    public static void main(String[] args) {
-        Server server = new Server();
-
-        try {
-            server.start(8082);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * Starts the server
