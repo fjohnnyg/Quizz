@@ -1,6 +1,5 @@
 package server;
 
-import server.drawing.Drawing;
 import server.messages.Messages;
 
 import java.io.*;
@@ -26,6 +25,16 @@ public class Server {
         this.asTheme = false;
         this.isGameEnded = false;
         this.questions = new Question();
+    }
+
+    public static void main(String[] args) {
+        Server server = new Server();
+
+        try {
+            server.start(8082);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -108,7 +117,7 @@ public class Server {
         String p1Answer;
         String p2Answer;
         String[] option = new String[MAX_NUM_OF_PLAYERS];
-        while (numOfQuestions < 2) {
+        while (numOfQuestions < 10) {
             String optionsRegex = "[abc]";
             broadCast(sendQuestion());
             for (int i = 0; i <= option.length - 1; i++) {
