@@ -108,14 +108,13 @@ public class Server {
         String p1Answer;
         String p2Answer;
         String[] option = new String[MAX_NUM_OF_PLAYERS];
-        while (numOfQuestions < 10) {
+        while (numOfQuestions < 2) {
             String optionsRegex = "[abc]";
             broadCast(sendQuestion());
             for (int i = 0; i <= option.length - 1; i++) {
                 option[i] = getPlayerAnswer(
                         players.get(i),
-                        optionsRegex,
-                        players.get(i).getName() + Messages.CHOOSE_ANSWER);
+                        optionsRegex);
             }
             p1Answer = option[0];
             p2Answer = option[1];
@@ -161,15 +160,13 @@ public class Server {
      * Check if they are correct or wrong and gives tem feedback.
      * @param playerHandler
      * @param regex
-     * @param invalidMessage
      * @return
      */
-    private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
+    private String getPlayerAnswer(PlayerHandler playerHandler, String regex){
         String answer;
         answer = getAnswerFromBuffer(playerHandler);
         while (!validateAnswer(answer, regex)  &&  answer!=null) {
             playerHandler.send(Messages.INVALID_ANSWER);
-            //playerHandler.send(playerHandler.getName() + invalidMessage);
             answer = getAnswerFromBuffer(playerHandler);
         }
         return answer;
@@ -269,11 +266,11 @@ public class Server {
         players.remove(playerHandler);
     }
 
-    /*public void areStillPlayersPlaying() {
+    public void areStillPlayersPlaying() {
         if (players == null) {
             endGame();
         }
-    }*/
+    }
 
     public void endGame() {
         players.stream()
@@ -373,10 +370,10 @@ public class Server {
                 playerSocket.close();
             } catch (IOException e) {
                 System.out.println("Couldn't closer player socket");
-            } /*finally {
+            } finally {
                 areStillPlayersPlaying();
-                broadCast(Messages.PLAYER_LEFT_GAME);//Player x left the game
-            }*/
+                broadCast(Messages.PLAYER_LEFT_GAME);
+            }
         }
 
         public String getName() {

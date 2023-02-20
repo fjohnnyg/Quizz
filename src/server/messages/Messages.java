@@ -5,7 +5,7 @@ public final class Messages {
     public static final String SERVER_CLOSED = "Server is closed.";
     public static final String DEFAULT_NAME = "PLAYER ";
     public static final String PLAYER_ENTERED_GAME = " entered the game.";
-    public static final String PLAYER_LEFT_GAME = " left the game.";
+    public static final String PLAYER_LEFT_GAME = "%s left the game.";
     public static final String NO_SUCH_COMMAND = "⚠️" + "\u001B[31m" + "Invalid command!" + "\u001B[0m";
     public static final String GAME_INSTRUCTIONS = """
            You will play against another player.
