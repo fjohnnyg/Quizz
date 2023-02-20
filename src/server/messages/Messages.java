@@ -16,7 +16,7 @@ public final class Messages {
            For the right answer you'll get 1 point. The winner is who has the most points in the end of the game.
            Good luck :)
            """;
-    public static final String WELCOME = "Welcome to Quizz! %s";
+    public static final String WELCOME = "%s Welcome to Quizz! \n";
     public static final String ASCII_WELCOME = "Welcome to Quizz!";
 
     public static final String SELF_NAME_CHANGED = "You changed your name to: %s";
@@ -28,12 +28,12 @@ public final class Messages {
     public static final String ASK_NAME = "What's your name?";
     public static final String INVALID_NAME = "\u001B[31m" + "Put a valid name." + "\u001B[0m";
     public static final String INVALID_ANSWER = "\u001B[31m" + "Invalid input." + "\u001B[0m" + "\nChoose answer A, B or C.";
-    public static final String START_GAME = "LET'S START THIS GAME!";
+    public static final String START_GAME = "LET'S START THIS GAME, %s";
     public static final String THEME_CHOOSER = "Please choose a theme: \n 1 - Sports \n 2 - Geography \n 3 - Arts";
-    public static final String ART = "The theme you'll play is: ART\n";
-    public static final String SPORTS = "The theme you'll play is: SPORTS\n";
-    public static final String GEOGRAPHY = "The theme you'll play is: GEOGRAPHY\n";
-    public static final String ALL_THEMES = "You'll be playing ALL THEMES\n";
+    public static final String ART = "\u001B[43m" + "The theme you'll play is: ART \u001B[0m \n";
+    public static final String SPORTS = "\u001B[43m" +"The theme you'll play is: SPORTS \u001B[0m \n";
+    public static final String GEOGRAPHY = "\u001B[43m" + "The theme you'll play is: GEOGRAPHY \u001B[0m \n";
+    public static final String ALL_THEMES = "\u001B[43m" + "You'll be playing ALL THEMES \u001B[0m \n";
     public static final String CHOOSE_ANSWER = " choose the answer A, B or C.";
 
 
@@ -43,15 +43,14 @@ public final class Messages {
     public static final String RIGHT_ANSWER = "\u001B[32m" + "RIGHT ANSWER." + "\u001B[0m" + "\nYour score is:  ";
     public static final String WARNING = "If you leave a game now you'll loose all your points!";
     public static final String FINAL_SCORE = " final score is: ";
-    public static final String WINNER = "\\u001B[33m" + "'##:::::'##:'####:'##::: ##:'##::: ##:'########:'########::'####:\n" +
-            " ##:'##: ##:. ##:: ###:: ##: ###:: ##: ##.....:: ##.... ##: ####:\n" +
-            " ##: ##: ##:: ##:: ####: ##: ####: ##: ##::::::: ##:::: ##: ####:\n" +
-            " ##: ##: ##:: ##:: ## ## ##: ## ## ##: ######::: ########::: ##::\n" +
-            " ##: ##: ##:: ##:: ##. ####: ##. ####: ##...:::: ##.. ##::::..:::\n" +
-            " ##: ##: ##:: ##:: ##:. ###: ##:. ###: ##::::::: ##::. ##::'####:\n" +
-            ". ###. ###::'####: ##::. ##: ##::. ##: ########: ##:::. ##: ####:\n" +
-            ":...::...:::....::..::::..::..::::..::........::..:::::..::....::" + "\u001B[0m";
-    public static final String GAME_OVER = "\u001B[31m" + ":'######::::::'###::::'##::::'##:'########:::::'#######::'##::::'##:'########:'########::\n" +
+    public static final String WINNER = "\u001B[33m" + "██╗    ██╗██╗███╗   ██╗███╗   ██╗███████╗██████╗ \n" +
+            "██║    ██║██║████╗  ██║████╗  ██║██╔════╝██╔══██╗\n" +
+            "██║ █╗ ██║██║██╔██╗ ██║██╔██╗ ██║█████╗  ██████╔╝\n" +
+            "██║███╗██║██║██║╚██╗██║██║╚██╗██║██╔══╝  ██╔══██╗\n" +
+            "╚███╔███╔╝██║██║ ╚████║██║ ╚████║███████╗██║  ██║\n" +
+            " ╚══╝╚══╝ ╚═╝╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝\n" +
+            "                                                 " + "\u001B[0m";
+    public static final String GAME_OVER = "\n \u001B[31m" + ":'######::::::'###::::'##::::'##:'########:::::'#######::'##::::'##:'########:'########::\n" +
             "'##... ##::::'## ##::: ###::'###: ##.....:::::'##.... ##: ##:::: ##: ##.....:: ##.... ##:\n" +
             " ##:::..::::'##:. ##:: ####'####: ##:::::::::: ##:::: ##: ##:::: ##: ##::::::: ##:::: ##:\n" +
             " ##::'####:'##:::. ##: ## ### ##: ######:::::: ##:::: ##: ##:::: ##: ######::: ########::\n" +

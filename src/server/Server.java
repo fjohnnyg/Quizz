@@ -10,7 +10,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 public class Server {
     private static final int MAX_NUM_OF_PLAYERS = 2;
     private ServerSocket serverSocket;
@@ -82,7 +81,7 @@ public class Server {
         String p1Answer;
         String p2Answer;
         String[] option = new String[MAX_NUM_OF_PLAYERS];
-        while (numOfQuestions < 10) {
+        while (numOfQuestions < 4) {
             String optionsRegex = "[abc]";
             broadCast(sendQuestion());
             for (int i = 0; i <= option.length - 1; i++) {
@@ -96,7 +95,6 @@ public class Server {
             dealWithAnswer(p1Answer, p2Answer);
             numOfQuestions++;
         }
-
         gamePlayersResults();
         endGame();
     }
@@ -142,20 +140,20 @@ public class Server {
     }
 
     private void dealWithAnswer(String p1Answer, String p2Answer) {
+
         if (verifyAnswer(p1Answer)) {
             players.get(0).setScore();
-            players.get(0).send(Messages.RIGHT_ANSWER + players.get(0).getScore());
+            players.get(0).send(Messages.RIGHT_ANSWER + players.get(0).getScore() + "\n");
+        } else {
+            players.get(0).send(Messages.WRONG_ANSWER + questions.getCorrectAnswerValue() + "\n");
         }
-        if (!verifyAnswer(p1Answer)) {
-            players.get(0).send(Messages.WRONG_ANSWER + questions.getCorrectAnswerValue());
-        }
+
         if (verifyAnswer(p2Answer)) {
             players.get(1).setScore();
-            players.get(1).send(Messages.RIGHT_ANSWER
-                    + players.get(1).getScore());
+            players.get(1).send(Messages.RIGHT_ANSWER + players.get(1).getScore() + "\n");
+        } else {
+            players.get(1).send(Messages.WRONG_ANSWER + questions.getCorrectAnswerValue() + "\n");
         }
-        if (!verifyAnswer(p2Answer))
-            players.get(1).send(Messages.WRONG_ANSWER + questions.getCorrectAnswerValue());
     }
 
     private boolean verifyAnswer(String answer) {
@@ -164,30 +162,45 @@ public class Server {
     }
 
     public String sendQuestion() {
-        return numOfQuestions + ". " + questions.getQuestion();
+        return "\u001B[44m" + (numOfQuestions+1) + ". " + questions.getQuestion() + "\u001B[0m";
     }
 
     public String checkWinner(){
-        String playerName = "";
 
-        if(players.get(0).getScore() < players.get(1).getScore()){
-            playerName = players.get(1).getName();
-        } else if (players.get(1).getScore() < players.get(0).getScore()){
-            playerName = players.get(0).getName();
-        } else {
-            playerName = "It's a draw!";
+        int maxScore = players.stream()
+                .mapToInt(player -> player.score)
+                .max()
+                .getAsInt();
+
+        long checkIfDraw = players.stream()
+                .filter(player -> player.getScore() == maxScore)
+                .count();
+
+        String winnerPlayerName = players.stream()
+                .sorted(Comparator.comparing(PlayerHandler::getScore).reversed())
+                .toList()
+                .get(0)
+                .getName();
+
+        if(checkIfDraw > 1){
+            return "It's a draw!";
         }
-
-        return playerName;
+        return winnerPlayerName;
     }
     public void gamePlayersResults(){
 
         for (PlayerHandler player: players) {
-            broadCast(player.getName() + Messages.FINAL_SCORE + player.getScore());
-
+            broadCast("-".repeat(30) + "\n" + player.getName() + Messages.FINAL_SCORE + player.getScore());
         }
 
-        broadCast(checkWinner() + "\n" + Messages.WINNER);
+        String winner = checkWinner();
+        if(winner != "It's a draw!") {
+            broadCast("\n" + Messages.WINNER + "is: " + winner.toUpperCase());
+            return;
+        }
+
+        broadCast(winner.toUpperCase());
+        broadCast(Messages.GAME_OVER);
     }
 
     public void broadCast(String message) {
@@ -264,7 +277,8 @@ public class Server {
             }
             name = input;
 
-            send(String.format(Messages.WELCOME, name));
+            //send(String.format(Messages.WELCOME, name));
+            send(String.format(Messages.START_GAME, name.toUpperCase()));
             runGame();
             while (!isGameEnded) {
                 if (Thread.interrupted()) {
@@ -272,7 +286,6 @@ public class Server {
                 }
             }
             quit();
-
         }
 
         public String getInput() {
@@ -316,10 +329,6 @@ public class Server {
 
         public String getName() {
             return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
         }
 
         public void setScore() {
