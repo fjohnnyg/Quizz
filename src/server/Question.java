@@ -23,12 +23,6 @@ public class Question {
         this.questionList = new ArrayList<>();
     }
 
-    public static void main(String[] args) throws IOException {
-        Question teste = new Question();
-
-        teste.createListOfQuestion("GEOGRAPHY");
-    }
-
     /**
      * This method receives the theme chosen by the player and create the list of questions from questions.txt
      * Puts the questions into the list in a random order
@@ -45,7 +39,7 @@ public class Question {
         else
             createListAllThemes(tempQuestionsList);
 
-        System.out.println(questionList.toString());
+        //System.out.println(questionList.toString());
         ////
         randomQuestions();
     }
@@ -74,7 +68,7 @@ public class Question {
                     }
                     line = readerQuestionTxt.readLine();
                     this.questionList.add(new ArrayList(temp));
-                    System.out.println(temp);
+                    //System.out.println(temp);
                     temp.clear();
                 }
                 break;
@@ -114,33 +108,6 @@ public class Question {
             System.out.println(temp);
             temp.clear();
         }
-        /*Path finalFilePath = Paths.get("resources/tempQuestions.txt");
-        BufferedReader questionReader = new BufferedReader(new FileReader(finalFilePath.toFile()));
-        String presentLine = "";
-        int randomQuestion;
-
-        List<Integer> jumpLines = new ArrayList<>();
-        for (int i = 0; i < Files.lines(finalFilePath).count()-1; i += 4) {
-            jumpLines.add(i);
-        }
-
-        while(questionList.size() < maxQuestions) {
-
-            randomQuestion = (int) (Math.random() * jumpLines.size());
-            System.out.println(jumpLines);
-            jumpLines.remove(randomQuestion);
-
-            presentLine = questionReader.readLine();
-            temp.add(presentLine.substring(presentLine.indexOf(": ")+2, presentLine.length()));
-
-            for (int i = 0; i < 3; i++) {
-                presentLine = questionReader.readLine();
-                temp.add(presentLine.substring(3, presentLine.length()));
-            }
-            this.questionList.add(new ArrayList(temp));
-            System.out.println(temp);
-            temp.clear();
-        }*/
     }
 
     private void createCleanFile() {
@@ -176,8 +143,8 @@ public class Question {
 
             Collections.shuffle(questionList.get(i).subList(1, 4));
         }
-        System.out.println(questionList);
-        System.out.println(correctAnswersList.toString());
+        //System.out.println(questionList);
+        //System.out.println(correctAnswersList.toString());
     }
 
     /**
