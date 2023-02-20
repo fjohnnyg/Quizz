@@ -28,6 +28,14 @@ public class Server {
         this.questions = new Question();
     }
 
+    /**
+     * Starts the server
+     * Defines the Thread Pool
+     * Define the max number of players and wait for them to join the "game"
+     * @param port
+     * @throws IOException
+     */
+
     public void start(int port) throws IOException {
         this.serverSocket = new ServerSocket(port);
         this.service = Executors.newCachedThreadPool();
@@ -40,8 +48,30 @@ public class Server {
         }
     }
 
-    public void runGame() {
+    /**
+     * Server accept players
+     * Creates PlayerHandler objects and gives them a new thread
+     * @throws IOException
+     */
 
+    public void acceptConnection() throws IOException {
+        Socket clientSocket = serverSocket.accept();
+        PlayerHandler playerHandler =
+                new PlayerHandler(clientSocket);
+        service.submit(playerHandler);
+    }
+
+    /**
+     * Add players to a List
+     * @param playerHandler
+     */
+    private void addPlayer(PlayerHandler playerHandler) {
+        players.add(playerHandler);
+        playerHandler.send(Messages.GAME_INSTRUCTIONS);
+        broadcast(playerHandler.getName(), Messages.PLAYER_ENTERED_GAME);
+    }
+
+    public void runGame() {
         if (checkIfGameCanStart() && !isGameStarted) {
             try {
                 startGame();
@@ -51,23 +81,11 @@ public class Server {
         }
     }
 
-    public void acceptConnection() throws IOException {
-        Socket clientSocket = serverSocket.accept();
-        PlayerHandler playerHandler =
-                new PlayerHandler(clientSocket);
-        service.submit(playerHandler);
-    }
-
-    private void addPlayer(PlayerHandler playerHandler) {
-        players.add(playerHandler);
-        playerHandler.send(Messages.GAME_INSTRUCTIONS);
-        broadcast(playerHandler.getName(), Messages.PLAYER_ENTERED_GAME);
-    }
-
-    public boolean isAcceptingPlayers() {
-        return players.size() < MAX_NUM_OF_PLAYERS && !isGameStarted;
-    }
-
+    /**
+     * Check the conditions to start the game:
+     * - number of players;
+     * - no game ongoing.
+     */
     public boolean checkIfGameCanStart() {
         return  !isAcceptingPlayers() &&
                 players.stream()
@@ -75,13 +93,22 @@ public class Server {
                         .noneMatch(playerHandler -> "".equals(playerHandler.getName()));
     }
 
+    public boolean isAcceptingPlayers() {
+        return players.size() < MAX_NUM_OF_PLAYERS && !isGameStarted;
+    }
+
+
+    /**
+     * Where the game loops and runs until the defined number of questions is answered
+     * @throws InterruptedException
+     */
     public void startGame() throws InterruptedException {
         isGameStarted = true;
         themeChooser();
         String p1Answer;
         String p2Answer;
         String[] option = new String[MAX_NUM_OF_PLAYERS];
-        while (numOfQuestions < 4) {
+        while (numOfQuestions < 10) {
             String optionsRegex = "[abc]";
             broadCast(sendQuestion());
             for (int i = 0; i <= option.length - 1; i++) {
@@ -114,16 +141,35 @@ public class Server {
         }
     }
 
+    public String sendQuestion() {
+
+        return "\u001B[44m" + (numOfQuestions+1) + ". " + questions.getQuestion() + "\u001B[0m";
+    }
+
+    /**
+     * Gets the player's input and formats it.
+     * @param playerHandler
+     * @return
+     */
     private String getAnswerFromBuffer(PlayerHandler playerHandler){
         String answer = playerHandler.getInput();
         return answer!=null? answer.toLowerCase(): null;
     }
 
+    /**
+     * This block of methods handles the players answers and validates it.
+     * Check if they are correct or wrong and gives tem feedback.
+     * @param playerHandler
+     * @param regex
+     * @param invalidMessage
+     * @return
+     */
     private String getPlayerAnswer(PlayerHandler playerHandler, String regex, String invalidMessage){
         String answer;
         answer = getAnswerFromBuffer(playerHandler);
         while (!validateAnswer(answer, regex)  &&  answer!=null) {
-            playerHandler.send(playerHandler.getName() + invalidMessage);
+            playerHandler.send(Messages.INVALID_ANSWER);
+            //playerHandler.send(playerHandler.getName() + invalidMessage);
             answer = getAnswerFromBuffer(playerHandler);
         }
         return answer;
@@ -161,10 +207,10 @@ public class Server {
         return correctAnswer.equalsIgnoreCase(answer);
     }
 
-    public String sendQuestion() {
-        return "\u001B[44m" + (numOfQuestions+1) + ". " + questions.getQuestion() + "\u001B[0m";
-    }
-
+    /**
+     * Verify the players' score and defines if there´s a winner or if it's a draw
+     * @return
+     */
     public String checkWinner(){
 
         int maxScore = players.stream()
@@ -203,12 +249,16 @@ public class Server {
         broadCast(Messages.GAME_OVER);
     }
 
+
+    /**
+     * Server send messages to all players'
+     * @param message
+     */
     public void broadCast(String message) {
         players.stream()
                 .filter(p -> !p.hasLeft)
                 .forEach(player -> player.send(message));
     }
-
     public void broadcast(String name, String message) {
         players.stream()
                 .filter(handler -> !handler.getName().equals(name))
@@ -219,11 +269,11 @@ public class Server {
         players.remove(playerHandler);
     }
 
-    public void areStillPlayersPlaying() {
+    /*public void areStillPlayersPlaying() {
         if (players == null) {
             endGame();
         }
-    }
+    }*/
 
     public void endGame() {
         players.stream()
@@ -232,15 +282,14 @@ public class Server {
         isGameEnded = true;
     }
 
-
     public class PlayerHandler implements Runnable {
-
         private String name = "";
         private Socket playerSocket;
         private BufferedWriter out;
         private boolean hasLeft;
         private BufferedReader in;
         private int score = 0;
+
 
         public PlayerHandler(Socket playerSocket) {
             this.playerSocket = playerSocket;
@@ -252,6 +301,11 @@ public class Server {
             }
         }
 
+        /**
+         * Ask the players' to input a valid name
+         * After this verification starts the game
+         * Checks if the game is running otherwise closes players' socket
+         */
         @Override
         public void run() {
 
@@ -266,12 +320,10 @@ public class Server {
             }
 
             send(Messages.ASK_NAME);
-            /*
-             * temporarily stores a user input while testing if it is a valid `name`
-             */
 
             String input = getInput();
-            while (!input.matches("[a-zA-Z]+")) {
+            //while (!input.matches("[a-zA-Z]+")) {
+            while (!input.matches("[a-zA-Z\\u00C0-\\u00ff]+")) {
                 send(Messages.INVALID_NAME);
                 input = getInput();
             }
@@ -321,10 +373,10 @@ public class Server {
                 playerSocket.close();
             } catch (IOException e) {
                 System.out.println("Couldn't closer player socket");
-            } finally {
+            } /*finally {
                 areStillPlayersPlaying();
                 broadCast(Messages.PLAYER_LEFT_GAME);//Player x left the game
-            }
+            }*/
         }
 
         public String getName() {
