@@ -1,6 +1,5 @@
 package server.drawing;
 
-import server.messages.Messages;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
